@@ -8,13 +8,10 @@ import {
   VolumeX,
   Maximize,
   Minimize,
-  Sliders,
-  Settings,
-  Sparkles,
+  Tv,
   ShieldCheck,
   CheckCircle2,
-  Lock,
-  Tv,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -83,7 +80,6 @@ export function FocusedLMSVideoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [quality, setQuality] = useState("1080p Full HD");
   const [hasStarted, setHasStarted] = useState(false);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,6 +95,13 @@ export function FocusedLMSVideoPlayer({
       }
     }
   }, [durationString, duration]);
+
+  // Reset start state when videoUrl changes
+  useEffect(() => {
+    setHasStarted(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+  }, [videoUrl]);
 
   // Handle auto-hide controls
   const handleMouseMove = () => {
@@ -125,9 +128,23 @@ export function FocusedLMSVideoPlayer({
     }
   };
 
-  // Play / Pause Toggle
+  // Start / Play / Pause Toggle
+  const startAndPlay = () => {
+    setHasStarted(true);
+    setIsPlaying(true);
+
+    if (isYouTube) {
+      sendYouTubeCommand("playVideo");
+    } else if (nativeVideoRef.current) {
+      nativeVideoRef.current.play().catch(() => {});
+    }
+  };
+
   const togglePlay = () => {
-    if (!hasStarted) setHasStarted(true);
+    if (!hasStarted) {
+      startAndPlay();
+      return;
+    }
 
     if (isYouTube) {
       if (isPlaying) {
@@ -142,7 +159,7 @@ export function FocusedLMSVideoPlayer({
         nativeVideoRef.current.pause();
         setIsPlaying(false);
       } else {
-        nativeVideoRef.current.play();
+        nativeVideoRef.current.play().catch(() => {});
         setIsPlaying(true);
       }
     }
@@ -230,10 +247,10 @@ export function FocusedLMSVideoPlayer({
     }
   };
 
-  // Periodic progress tracker timer for YouTube iframe
+  // Periodic progress tracker timer for video progress
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isPlaying) {
+    if (isPlaying && hasStarted) {
       interval = setInterval(() => {
         setCurrentTime((prev) => {
           const next = prev + playbackRate;
@@ -260,11 +277,12 @@ export function FocusedLMSVideoPlayer({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlaying, playbackRate, duration, isCompleted, onCompleted, onProgress]);
+  }, [isPlaying, hasStarted, playbackRate, duration, isCompleted, onCompleted, onProgress]);
 
-  // Construct Clean Sandboxed YouTube URL without any brandings/external links (Universal Mobile & Desktop)
+  // YouTube High-Compatibility URL:
+  // Using standard embed with autoplay when started, modestbranding, rel=0, playsinline=1, no-cookie fallback
   const cleanYouTubeUrl = youtubeId
-    ? `https://www.youtube.com/embed/${youtubeId}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&controls=0`
+    ? `https://www.youtube.com/embed/${youtubeId}?autoplay=${hasStarted ? 1 : 0}&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1`
     : "";
 
   return (
@@ -278,16 +296,35 @@ export function FocusedLMSVideoPlayer({
     >
       {/* 1. Underlying Video Render: YouTube Clean Embed or Native Video */}
       {isYouTube ? (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden scale-[1.02]">
-          <iframe
-            ref={iframeRef}
-            src={cleanYouTubeUrl}
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            className="w-full h-full border-0 pointer-events-none"
-          />
-        </div>
+        hasStarted ? (
+          <div className="absolute inset-0 overflow-hidden">
+            <iframe
+              ref={iframeRef}
+              src={cleanYouTubeUrl}
+              title={title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              className="w-full h-full border-0"
+            />
+          </div>
+        ) : (
+          <div
+            onClick={startAndPlay}
+            className="absolute inset-0 cursor-pointer bg-zinc-950 flex items-center justify-center group/poster"
+          >
+            {thumbnailUrl ? (
+              <img
+                src={thumbnailUrl}
+                alt={title}
+                className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover/poster:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+          </div>
+        )
       ) : (
         <video
           ref={nativeVideoRef}
@@ -309,26 +346,10 @@ export function FocusedLMSVideoPlayer({
         />
       )}
 
-      {/* 2. Interactive Click Shield (Blocks all external YouTube hyperlinks/logos and converts clicks into play/pause) */}
+      {/* 2. Top Header Bar: Clean LMS Focus Mode Badge */}
       <div
-        onClick={togglePlay}
-        className="absolute inset-0 z-10 cursor-pointer bg-transparent"
-        title="Klik untuk Putar / Jeda Video"
-      />
-
-      {/* 3. Ambient Dark Vignette & Theater Backdrop */}
-      <div
-        className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-300 ${
-          showControls || !isPlaying
-            ? "bg-gradient-to-t from-black/95 via-black/20 to-black/70"
-            : "bg-transparent opacity-0"
-        }`}
-      />
-
-      {/* 4. Top Header Bar: Clean LMS Focus Mode Badge */}
-      <div
-        className={`absolute top-0 inset-x-0 p-4 sm:p-5 flex items-center justify-between z-20 transition-all duration-300 ${
-          showControls || !isPlaying ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"
+        className={`absolute top-0 inset-x-0 p-4 sm:p-5 flex items-center justify-between z-20 transition-all duration-300 pointer-events-none ${
+          showControls || !hasStarted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
         }`}
       >
         <div className="flex items-center gap-2.5 max-w-[75%]">
@@ -352,25 +373,25 @@ export function FocusedLMSVideoPlayer({
         </div>
       </div>
 
-      {/* 5. Center Big Play / Pause Overlay */}
-      {(!isPlaying || !hasStarted) && (
+      {/* 3. Center Big Play Button (when not started yet) */}
+      {!hasStarted && (
         <div
-          onClick={togglePlay}
+          onClick={startAndPlay}
           className="absolute inset-0 flex flex-col items-center justify-center z-20 cursor-pointer pointer-events-auto"
         >
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/95 text-primary-foreground flex items-center justify-center shadow-2xl shadow-primary/40 transition-all duration-300 hover:scale-110 hover:bg-primary active:scale-95 group/btn">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl shadow-primary/50 transition-all duration-300 hover:scale-110 active:scale-95 group/btn">
             <Play className="w-8 h-8 sm:w-9 h-9 fill-current ml-1 transform group-hover/btn:scale-105 transition-transform" />
           </div>
-          <p className="mt-4 text-xs sm:text-sm font-semibold text-white/90 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15">
-            Klik untuk Mulai Belajar
+          <p className="mt-4 text-xs sm:text-sm font-semibold text-white/90 bg-black/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 shadow-lg">
+            Klik untuk Mulai Belajar 🚀
           </p>
         </div>
       )}
 
-      {/* 6. Bottom Unified LMS Video Controller Bar */}
+      {/* 4. Bottom Unified LMS Video Controller Bar (when not started or when playing) */}
       <div
         className={`absolute bottom-0 inset-x-0 p-4 sm:p-5 bg-gradient-to-t from-black/95 via-black/80 to-transparent z-20 transition-all duration-300 ${
-          showControls || !isPlaying ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
+          showControls || !hasStarted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
         }`}
       >
         {/* Scrubber Progress Slider */}
@@ -393,7 +414,7 @@ export function FocusedLMSVideoPlayer({
             <button
               onClick={togglePlay}
               className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95"
-              title={isPlaying ? "Jeda (Space)" : "Putar (Space)"}
+              title={isPlaying ? "Jeda" : "Putar"}
             >
               {isPlaying ? <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-current" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />}
             </button>
@@ -440,9 +461,8 @@ export function FocusedLMSVideoPlayer({
             </div>
           </div>
 
-          {/* Right Controls: Speed, Quality, Fullscreen */}
+          {/* Right Controls: Speed, Fullscreen */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Speed Selector Button */}
             <button
               onClick={cyclePlaybackRate}
               className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[11px] sm:text-xs font-bold transition-colors"
@@ -451,12 +471,6 @@ export function FocusedLMSVideoPlayer({
               {playbackRate}x
             </button>
 
-            {/* Quality Indicator */}
-            <span className="hidden sm:inline-block px-2.5 py-1 rounded-lg bg-white/10 text-white/80 font-mono text-[11px] font-semibold">
-              {quality}
-            </span>
-
-            {/* Fullscreen Button */}
             <button
               onClick={toggleFullscreen}
               className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all active:scale-95"
