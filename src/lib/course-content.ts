@@ -24,6 +24,17 @@ const STORAGE_KEY = "digisschool_lms_contents_v1";
 
 const DEFAULT_CONTENTS: LMSContentItem[] = [
   {
+    id: "content-pertemuan-1",
+    materialSlug: "berpikir-komputasional-dasar",
+    moduleIndex: 0,
+    type: "video",
+    title: "pertemuan pertama",
+    description: "materi pertama",
+    url: "https://www.youtube.com/watch?v=mUXo-S8gkds",
+    duration: "18:45",
+    createdAt: new Date().toISOString(),
+  },
+  {
     id: "content-1",
     materialSlug: "berpikir-komputasional-dasar",
     moduleIndex: 0,
@@ -102,29 +113,31 @@ export function getStoredContents(materialSlug?: string, moduleIndex?: number): 
 }
 
 /**
- * Syncs and fetches all contents from Turso Cloud DB to ensure cross-device consistency.
+ * Syncs and fetches all contents from Turso Cloud DB to ensure cross-device consistency across Mobile & Desktop.
  */
 export async function syncCloudContents(materialSlug?: string, moduleIndex?: number): Promise<LMSContentItem[]> {
   try {
     const res = await getCourseContentsAction({ data: { materialSlug, moduleIndex } });
-    if (res?.success && res.contents && res.contents.length > 0) {
-      const local = getStoredContents();
-      const map = new Map<string, LMSContentItem>();
+    const local = getStoredContents();
+    const cloudItems: LMSContentItem[] = res?.success && res.contents && res.contents.length > 0 ? res.contents : [];
 
-      // Populate default & local items
-      local.forEach((item) => map.set(item.id, item));
-      // Overwrite / merge with Cloud Database
-      res.contents.forEach((item: any) => map.set(item.id, item));
-
-      const merged = Array.from(map.values());
-      if (typeof window !== "undefined") {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        window.dispatchEvent(new CustomEvent("digisschool:content_updated"));
+    // Auto-migrate any local desktop items to Cloud DB if not present in Cloud DB
+    const cloudIds = new Set(cloudItems.map((c) => c.id));
+    for (const locItem of local) {
+      if (!cloudIds.has(locItem.id)) {
+        saveCourseContentAction({ data: locItem }).catch(() => {});
+        cloudItems.push(locItem);
+        cloudIds.add(locItem.id);
       }
-      return getStoredContents(materialSlug, moduleIndex);
     }
-  } catch {
-    // fallback to local cache
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudItems));
+      window.dispatchEvent(new CustomEvent("digisschool:content_updated"));
+    }
+    return getStoredContents(materialSlug, moduleIndex);
+  } catch (err) {
+    console.warn("[CloudSync] Turso cloud sync error, fallback to local:", err);
   }
   return getStoredContents(materialSlug, moduleIndex);
 }
@@ -142,9 +155,9 @@ export function addContentItem(item: Omit<LMSContentItem, "id" | "createdAt">): 
     window.dispatchEvent(new CustomEvent("digisschool:content_updated"));
   }
 
-  // Persist to Cloud Database (Turso LibSQL) asynchronously
-  saveCourseContentAction({ data: newItem }).catch(() => {
-    // silent catch, optimistic local already stored
+  // Persist to Turso Cloud Database immediately
+  saveCourseContentAction({ data: newItem }).catch((err) => {
+    console.error("[CloudSync] Failed to save content item to cloud:", err);
   });
 
   return newItem;
@@ -158,8 +171,8 @@ export function deleteContentItem(id: string) {
     window.dispatchEvent(new CustomEvent("digisschool:content_updated"));
   }
 
-  // Delete from Cloud Database (Turso LibSQL) asynchronously
-  deleteCourseContentAction({ data: { id } }).catch(() => {
-    // silent catch
+  // Delete from Turso Cloud Database immediately
+  deleteCourseContentAction({ data: { id } }).catch((err) => {
+    console.error("[CloudSync] Failed to delete content item from cloud:", err);
   });
 }

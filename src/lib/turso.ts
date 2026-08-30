@@ -186,7 +186,13 @@ export async function initTursoSchema() {
       duration TEXT,
       is_downloadable INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );`
+    );`,
+
+    `INSERT OR IGNORE INTO course_contents (id, material_slug, module_index, type, title, description, url, duration, is_downloadable)
+     VALUES ('content-0-pertemuan-pertama', 'berpikir-komputasional-dasar', 0, 'video', 'pertemuan pertama', 'materi pertama', 'https://www.youtube.com/watch?v=mUXo-S8gkds', '18:45', 0);`,
+
+    `INSERT OR IGNORE INTO course_contents (id, material_slug, module_index, type, title, description, url, duration, is_downloadable)
+     VALUES ('content-1', 'berpikir-komputasional-dasar', 0, 'video', 'Video Pembelajaran: 4 Pilar Berpikir Komputasional', 'Penjelasan mendalam tentang Dekomposisi, Pengenalan Pola, Abstraksi, dan Algoritma.', 'https://www.youtube.com/watch?v=mUXo-S8gkds', '18:45', 0);`
   ], "write");
 
   return { success: true, message: "Turso database schema initialized successfully" };
