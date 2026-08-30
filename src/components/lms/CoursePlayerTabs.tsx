@@ -107,9 +107,9 @@ export function CoursePlayerTabs({
   const [activeVideoModalItem, setActiveVideoModalItem] = useState<LMSContentItem | null>(null);
 
   const loadContents = () => {
-    setContents(getStoredContents(materialSlug, currentModuleIndex));
+    setContents(getStoredContents(materialSlug));
     // Asynchronously fetch fresh data from Turso Cloud DB
-    syncCloudContents(materialSlug, currentModuleIndex).then((fresh) => {
+    syncCloudContents(materialSlug).then((fresh) => {
       if (fresh) setContents(fresh);
     });
   };
@@ -117,11 +117,11 @@ export function CoursePlayerTabs({
   useEffect(() => {
     loadContents();
     const handleUpdate = () => {
-      setContents(getStoredContents(materialSlug, currentModuleIndex));
+      setContents(getStoredContents(materialSlug));
     };
     window.addEventListener("digisschool:content_updated", handleUpdate);
     return () => window.removeEventListener("digisschool:content_updated", handleUpdate);
-  }, [materialSlug, currentModuleIndex]);
+  }, [materialSlug]);
 
   // --- Notes State ---
   const [notes, setNotes] = useState<Note[]>([]);

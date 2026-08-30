@@ -333,9 +333,10 @@ function MaterialDetailPage() {
     if (videoItem?.url) return videoItem.url;
     const fallbackUrls = [
       "https://www.youtube.com/watch?v=kM9ASKAni_s",
-      "https://www.youtube.com/watch?v=8popR3x-VMY",
       "https://www.youtube.com/watch?v=f9wVvR99q6s",
+      "https://www.youtube.com/watch?v=aircAruvnKk",
       "https://www.youtube.com/watch?v=y881t8ilMyc",
+      "https://www.youtube.com/watch?v=e-ORhEE9VVg",
     ];
     return fallbackUrls[selectedModuleIndex % fallbackUrls.length];
   }, [slug, selectedModuleIndex, material, contentVersion]);
