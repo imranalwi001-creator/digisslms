@@ -15,6 +15,7 @@ export const Route = createRootRoute({
       { property: "og:title", content: "Digisschool — Digital Islamic Boarding School LMS" },
       { property: "og:description", content: "Platform pembelajaran digital terpadu untuk santri dan siswa Digital Islamic Boarding School." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://digisschool.my.id" },
       { property: "og:image", content: "/digisschool-logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Digisschool — Digital Islamic Boarding School LMS" },
@@ -22,6 +23,10 @@ export const Route = createRootRoute({
       { name: "twitter:image", content: "/digisschool-logo.png" },
     ],
     links: [
+      {
+        rel: "canonical",
+        href: "https://digisschool.my.id",
+      },
       {
         rel: "icon",
         type: "image/png",
