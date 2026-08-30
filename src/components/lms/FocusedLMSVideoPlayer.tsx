@@ -262,11 +262,9 @@ export function FocusedLMSVideoPlayer({
     };
   }, [isPlaying, playbackRate, duration, isCompleted, onCompleted, onProgress]);
 
-  // Construct Clean Sandboxed YouTube URL without any brandings/external links
+  // Construct Clean Sandboxed YouTube URL without any brandings/external links (Universal Mobile & Desktop)
   const cleanYouTubeUrl = youtubeId
-    ? `https://www.youtube-nocookie.com/embed/${youtubeId}?enablejsapi=1&autoplay=0&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&showinfo=0&loop=0&origin=${
-        typeof window !== "undefined" ? window.location.origin : "https://digisschool.my.id"
-      }`
+    ? `https://www.youtube.com/embed/${youtubeId}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&controls=0`
     : "";
 
   return (
@@ -280,12 +278,13 @@ export function FocusedLMSVideoPlayer({
     >
       {/* 1. Underlying Video Render: YouTube Clean Embed or Native Video */}
       {isYouTube ? (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden scale-[1.03]">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden scale-[1.02]">
           <iframe
             ref={iframeRef}
             src={cleanYouTubeUrl}
             title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
             className="w-full h-full border-0 pointer-events-none"
           />
         </div>
