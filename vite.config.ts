@@ -2,6 +2,7 @@ import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import { nitro } from "nitro/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -161,7 +162,7 @@ function devServerFnErrorLogger() {
 }
 
 export default defineConfig(({ command, mode }) => {
-  const useCloudflare = command === "build";
+  const useCloudflare = Boolean(process.env.CF_PAGES || process.env.CLOUDFLARE_PAGES || process.env.USE_CLOUDFLARE);
 
   // Load VITE_ env vars and define them for SSR
   const env = loadEnv(mode, process.cwd(), "VITE_");
@@ -189,7 +190,7 @@ export default defineConfig(({ command, mode }) => {
       }),
       devClientErrorLogger(),
       devServerFnErrorLogger(),
-      ...(useCloudflare ? [cloudflare({ viteEnvironment: { name: "ssr" } })] : []),
+      ...(useCloudflare ? [cloudflare({ viteEnvironment: { name: "ssr" } })] : [nitro()]),
       tanstackStart(),
       viteReact(),
       mode === "development" && componentTagger(),
