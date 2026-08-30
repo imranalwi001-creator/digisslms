@@ -332,10 +332,10 @@ function MaterialDetailPage() {
     const videoItem = contents.find((c) => c.type === "video");
     if (videoItem?.url) return videoItem.url;
     const fallbackUrls = [
-      "https://www.youtube.com/watch?v=mUXo-S8gkds",
       "https://www.youtube.com/watch?v=kM9ASKAni_s",
-      "https://www.youtube.com/watch?v=f9wVvR99q6s",
       "https://www.youtube.com/watch?v=8popR3x-VMY",
+      "https://www.youtube.com/watch?v=f9wVvR99q6s",
+      "https://www.youtube.com/watch?v=y881t8ilMyc",
     ];
     return fallbackUrls[selectedModuleIndex % fallbackUrls.length];
   }, [slug, selectedModuleIndex, material, contentVersion]);
