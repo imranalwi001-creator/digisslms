@@ -40,13 +40,12 @@ export function getTursoClient(): Client {
     }
   }
 
-  if (!url) {
-    console.warn("TURSO_DATABASE_URL is not set. Using local file fallback.");
-  }
+  const DEFAULT_TURSO_URL = "libsql://lms-imranalwi001-creator.aws-ap-northeast-1.turso.io";
+  const DEFAULT_TURSO_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODgwNjcyOTksImlkIjoiMDFhMDUxMWQtNTQwMS03MDY2LTg1NDAtNGI1MzFkNGE0MGIwIiwia2lkIjoibkdMTmRjb3ZnUGJJc0YzM0J3cUhtOTh0SDZXTE1XSGJiVVdxYUpjajl5ayIsInJpZCI6ImY2YWU2OTg2LTJmN2EtNDE4Zi1iNWMxLTUyZmI3ODBlZTJjMSJ9.NuLDyOSsdlR2drZ6s7mnyAywhTYQpMLWqv192ihkn1qWXs2s6RYyXCCw2siy1hpFt4h7coBwJVJQBFdipxz7DQ";
 
   tursoClient = createClient({
-    url: url || "file:local.db",
-    authToken: authToken || undefined,
+    url: url || DEFAULT_TURSO_URL,
+    authToken: authToken || DEFAULT_TURSO_TOKEN,
   });
 
   return tursoClient;
