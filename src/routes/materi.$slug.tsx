@@ -14,6 +14,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CoursePlayerTabs } from "@/components/lms/CoursePlayerTabs";
+import { FocusedLMSVideoPlayer } from "@/components/lms/FocusedLMSVideoPlayer";
+import { getStoredContents } from "@/lib/course-content";
 import {
   listPublishedQuizzesForMaterial,
   getQuizForStudent,
@@ -315,6 +317,20 @@ function MaterialDetailPage() {
     }
   };
 
+  const activeModuleVideoUrl = useMemo(() => {
+    if (!material) return "";
+    const contents = getStoredContents(slug, selectedModuleIndex);
+    const videoItem = contents.find((c) => c.type === "video");
+    if (videoItem?.url) return videoItem.url;
+    const fallbackUrls = [
+      "https://www.youtube.com/watch?v=mUXo-S8gkds",
+      "https://www.youtube.com/watch?v=kM9ASKAni_s",
+      "https://www.youtube.com/watch?v=f9wVvR99q6s",
+      "https://www.youtube.com/watch?v=8popR3x-VMY",
+    ];
+    return fallbackUrls[selectedModuleIndex % fallbackUrls.length];
+  }, [slug, selectedModuleIndex, material]);
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteHeader />
@@ -358,73 +374,17 @@ function MaterialDetailPage() {
           <div className="grid lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_380px] gap-8 items-start">
             {/* Left: Main Stage & Lecture Content */}
             <div className="space-y-6 min-w-0">
-              {/* Lecture Screen / Interactive Theater Player */}
-              <div className="relative aspect-[16/9] rounded-3xl overflow-hidden border border-border/80 bg-zinc-950 shadow-xl group">
-                <img
-                  src={material.image}
-                  alt={material.title}
-                  className="w-full h-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/20" />
-
-                {/* Top Player Ambient Badge */}
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md text-white text-xs font-mono border border-white/20">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                    Modul {selectedModuleIndex + 1} dari {material.moduleList.length}
-                  </span>
-
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white/90 text-xs font-mono border border-white/15">
-                    <Clock className="w-3.5 h-3.5 text-amber-300" />
-                    25 Menit
-                  </span>
-                </div>
-
-                {/* Theater Center Overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white z-10">
-                  <div
-                    onClick={() => toast.info("Memutar video modul pembelajaran...")}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/95 text-primary-foreground flex items-center justify-center mb-4 shadow-xl shadow-primary/30 transition-all duration-300 hover:scale-110 hover:bg-primary cursor-pointer active:scale-95 group/btn"
-                  >
-                    <PlayCircle className="w-9 h-9 sm:w-10 sm:h-10 transform group-hover/btn:scale-105 transition-transform" />
-                  </div>
-                  <span className="font-mono text-xs font-bold uppercase tracking-widest text-amber-300 mb-1.5">
-                    {material.element || "Materi Pembelajaran"}
-                  </span>
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white max-w-xl leading-tight drop-shadow-md">
-                    {currentModuleTitle}
-                  </h2>
-                </div>
-
-                {/* Bottom Player Controller Bar */}
-                <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-20">
-                  <div className="flex items-center justify-between text-xs text-white/80 font-mono">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => toast.info("Putar materi...")}
-                        className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-                      >
-                        <PlayCircle className="w-4 h-4" />
-                      </button>
-                      <span className="text-[11px] text-white/70">04:20 / 25:00</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-md bg-white/15 backdrop-blur-md text-[11px] text-white/90">
-                        HD 1080p
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md bg-white/15 backdrop-blur-md text-[11px] text-white/90">
-                        1.0x
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Progress Line */}
-                  <div className="w-full h-1 bg-white/20 rounded-full mt-2 overflow-hidden">
-                    <div className="w-1/3 h-full bg-primary rounded-full" />
-                  </div>
-                </div>
-              </div>
+              {/* Focused Clean LMS Video Player (Zero-distraction / Native controls) */}
+              <FocusedLMSVideoPlayer
+                videoUrl={activeModuleVideoUrl}
+                title={currentModuleTitle}
+                moduleName={`Modul ${selectedModuleIndex + 1}`}
+                thumbnailUrl={material.image}
+                durationString={material.duration}
+                onCompleted={() => {
+                  toast.success(`Modul ${selectedModuleIndex + 1} (${currentModuleTitle}) selesai dipelajari!`);
+                }}
+              />
 
               {/* Module Action & Progress Controller */}
               <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border border-border/80 bg-card shadow-xs">

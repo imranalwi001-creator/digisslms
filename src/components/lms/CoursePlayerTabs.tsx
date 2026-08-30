@@ -19,6 +19,14 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { InteractiveCodingSandbox } from "@/components/lms/InteractiveCodingSandbox";
+import { FocusedLMSVideoPlayer } from "@/components/lms/FocusedLMSVideoPlayer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   getStudentNotesForMaterial,
   saveStudentNoteAction,
@@ -95,6 +103,7 @@ export function CoursePlayerTabs({
   const [contents, setContents] = useState<LMSContentItem[]>([]);
   const [uploaderOpen, setUploaderOpen] = useState(false);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const [activeVideoModalItem, setActiveVideoModalItem] = useState<LMSContentItem | null>(null);
 
   const loadContents = () => {
     setContents(getStoredContents(materialSlug, currentModuleIndex));
@@ -636,13 +645,10 @@ export function CoursePlayerTabs({
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-xs gap-1.5 rounded-xl font-semibold"
-                            onClick={() => {
-                              if (item.url.startsWith("http")) window.open(item.url, "_blank");
-                              else toast.info("Memutar video lampiran materi...");
-                            }}
+                            className="text-xs gap-1.5 rounded-xl font-semibold bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
+                            onClick={() => setActiveVideoModalItem(item)}
                           >
-                            <Play className="w-3.5 h-3.5 text-rose-500" />
+                            <Play className="w-3.5 h-3.5 text-rose-500 fill-current" />
                             Putar Video
                           </Button>
                         ) : (
@@ -757,6 +763,20 @@ export function CoursePlayerTabs({
           </div>
         )}
       </div>
+
+      {/* Focused LMS Video Modal (No External Distractions) */}
+      <Dialog open={!!activeVideoModalItem} onOpenChange={(open) => !open && setActiveVideoModalItem(null)}>
+        <DialogContent className="max-w-3xl sm:max-w-4xl p-0 overflow-hidden border-border/80 bg-black text-white rounded-3xl shadow-2xl">
+          {activeVideoModalItem && (
+            <FocusedLMSVideoPlayer
+              videoUrl={activeVideoModalItem.url}
+              title={activeVideoModalItem.title}
+              moduleName={`Modul ${activeVideoModalItem.moduleIndex + 1}`}
+              durationString={activeVideoModalItem.duration}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
