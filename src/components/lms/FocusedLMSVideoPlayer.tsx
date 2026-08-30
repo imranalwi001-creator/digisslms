@@ -297,15 +297,13 @@ export function FocusedLMSVideoPlayer({
       {/* 1. Underlying Video Render: YouTube Clean Embed or Native Video */}
       {isYouTube ? (
         hasStarted ? (
-          <div className="absolute inset-0 overflow-hidden scale-[1.03]">
+          <div className="absolute inset-0 overflow-hidden">
             <iframe
               ref={iframeRef}
               src={cleanYouTubeUrl}
               title={title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
-              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-              referrerPolicy="strict-origin-when-cross-origin"
               className="w-full h-full border-0"
             />
           </div>

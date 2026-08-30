@@ -20,7 +20,7 @@ export interface LMSContentItem {
   createdAt: string;
 }
 
-const STORAGE_KEY = "digisschool_lms_contents_v1";
+const STORAGE_KEY = "digisschool_lms_contents_v2";
 
 const DEFAULT_CONTENTS: LMSContentItem[] = [
   {
