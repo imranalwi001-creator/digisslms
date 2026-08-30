@@ -44,11 +44,11 @@ function fromBuiltin(m: Materi): CatalogMaterial {
   return {
     ...m,
     id: null,
-    description: "",
+    description: m.description || "",
     isPublished: true,
     isCustom: false,
-    semester: 1,
-    element: null,
+    semester: m.semester ?? 1,
+    element: m.element ?? null,
   };
 }
 
