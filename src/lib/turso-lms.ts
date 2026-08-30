@@ -332,5 +332,85 @@ export const TursoRepository = {
       metadata,
       created_at: new Date().toISOString(),
     };
+  },
+
+  // ==========================================
+  // COURSE MULTIMEDIA & ATTACHMENTS
+  // ==========================================
+  async getCourseContents(materialSlug?: string, moduleIndex?: number): Promise<any[]> {
+    const db = getTursoClient();
+    let sql = "SELECT * FROM course_contents";
+    const args: any[] = [];
+
+    if (materialSlug && typeof moduleIndex === "number") {
+      sql += " WHERE material_slug = ? AND (module_index = ? OR module_index = -1)";
+      args.push(materialSlug, moduleIndex);
+    } else if (materialSlug) {
+      sql += " WHERE material_slug = ?";
+      args.push(materialSlug);
+    }
+
+    sql += " ORDER BY created_at DESC;";
+
+    const res = await db.execute({ sql, args });
+    return res.rows.map((r) => ({
+      id: String(r.id),
+      materialSlug: String(r.material_slug),
+      moduleIndex: Number(r.module_index),
+      type: String(r.type),
+      title: String(r.title),
+      description: r.description ? String(r.description) : undefined,
+      url: String(r.url),
+      fileSize: r.file_size ? String(r.file_size) : undefined,
+      duration: r.duration ? String(r.duration) : undefined,
+      isDownloadable: Boolean(r.is_downloadable),
+      createdAt: String(r.created_at || ""),
+    }));
+  },
+
+  async saveCourseContent(item: {
+    id?: string;
+    materialSlug: string;
+    moduleIndex: number;
+    type: string;
+    title: string;
+    description?: string;
+    url: string;
+    fileSize?: string;
+    duration?: string;
+    isDownloadable?: boolean;
+  }): Promise<any> {
+    const db = getTursoClient();
+    const id = item.id || `content-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    await db.execute({
+      sql: `INSERT OR REPLACE INTO course_contents (id, material_slug, module_index, type, title, description, url, file_size, duration, is_downloadable)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      args: [
+        id,
+        item.materialSlug,
+        item.moduleIndex,
+        item.type,
+        item.title,
+        item.description || null,
+        item.url,
+        item.fileSize || null,
+        item.duration || null,
+        item.isDownloadable ? 1 : 0,
+      ],
+    });
+
+    return {
+      id,
+      ...item,
+      createdAt: new Date().toISOString(),
+    };
+  },
+
+  async deleteCourseContent(id: string): Promise<void> {
+    const db = getTursoClient();
+    await db.execute({
+      sql: "DELETE FROM course_contents WHERE id = ?;",
+      args: [id],
+    });
   }
 };

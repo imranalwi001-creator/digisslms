@@ -1,3 +1,9 @@
+import {
+  getCourseContentsAction,
+  saveCourseContentAction,
+  deleteCourseContentAction,
+} from "@/lib/turso.functions";
+
 export type LMSContentType = "video" | "pdf" | "audio" | "code" | "file" | "link";
 
 export interface LMSContentItem {
@@ -95,6 +101,34 @@ export function getStoredContents(materialSlug?: string, moduleIndex?: number): 
   }
 }
 
+/**
+ * Syncs and fetches all contents from Turso Cloud DB to ensure cross-device consistency.
+ */
+export async function syncCloudContents(materialSlug?: string, moduleIndex?: number): Promise<LMSContentItem[]> {
+  try {
+    const res = await getCourseContentsAction({ data: { materialSlug, moduleIndex } });
+    if (res?.success && res.contents && res.contents.length > 0) {
+      const local = getStoredContents();
+      const map = new Map<string, LMSContentItem>();
+
+      // Populate default & local items
+      local.forEach((item) => map.set(item.id, item));
+      // Overwrite / merge with Cloud Database
+      res.contents.forEach((item: any) => map.set(item.id, item));
+
+      const merged = Array.from(map.values());
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        window.dispatchEvent(new CustomEvent("digisschool:content_updated"));
+      }
+      return getStoredContents(materialSlug, moduleIndex);
+    }
+  } catch {
+    // fallback to local cache
+  }
+  return getStoredContents(materialSlug, moduleIndex);
+}
+
 export function addContentItem(item: Omit<LMSContentItem, "id" | "createdAt">): LMSContentItem {
   const current = getStoredContents();
   const newItem: LMSContentItem = {
@@ -107,6 +141,12 @@ export function addContentItem(item: Omit<LMSContentItem, "id" | "createdAt">): 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent("digisschool:content_updated"));
   }
+
+  // Persist to Cloud Database (Turso LibSQL) asynchronously
+  saveCourseContentAction({ data: newItem }).catch(() => {
+    // silent catch, optimistic local already stored
+  });
+
   return newItem;
 }
 
@@ -117,4 +157,9 @@ export function deleteContentItem(id: string) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent("digisschool:content_updated"));
   }
+
+  // Delete from Cloud Database (Turso LibSQL) asynchronously
+  deleteCourseContentAction({ data: { id } }).catch(() => {
+    // silent catch
+  });
 }

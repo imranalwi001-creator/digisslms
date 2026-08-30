@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import {
   getStoredContents,
+  syncCloudContents,
   deleteContentItem,
   type LMSContentItem,
 } from "@/lib/course-content";
@@ -107,11 +108,17 @@ export function CoursePlayerTabs({
 
   const loadContents = () => {
     setContents(getStoredContents(materialSlug, currentModuleIndex));
+    // Asynchronously fetch fresh data from Turso Cloud DB
+    syncCloudContents(materialSlug, currentModuleIndex).then((fresh) => {
+      if (fresh) setContents(fresh);
+    });
   };
 
   useEffect(() => {
     loadContents();
-    const handleUpdate = () => loadContents();
+    const handleUpdate = () => {
+      setContents(getStoredContents(materialSlug, currentModuleIndex));
+    };
     window.addEventListener("digisschool:content_updated", handleUpdate);
     return () => window.removeEventListener("digisschool:content_updated", handleUpdate);
   }, [materialSlug, currentModuleIndex]);

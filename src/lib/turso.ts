@@ -171,6 +171,21 @@ export async function initTursoSchema() {
       question TEXT NOT NULL,
       replies TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );`,
+
+    // Course Contents (Cross-Device Cloud Multimedia & Attachments)
+    `CREATE TABLE IF NOT EXISTS course_contents (
+      id TEXT PRIMARY KEY,
+      material_slug TEXT NOT NULL,
+      module_index INTEGER NOT NULL DEFAULT 0,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      url TEXT NOT NULL,
+      file_size TEXT,
+      duration TEXT,
+      is_downloadable INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );`
   ], "write");
 

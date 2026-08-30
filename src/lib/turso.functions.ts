@@ -129,3 +129,54 @@ export const issueTursoCertificateAction = createServerFn({ method: "POST" })
       return { certificate: null, success: false, error: e.message };
     }
   });
+
+// ==========================================
+// COURSE MULTIMEDIA & ATTACHMENTS (CLOUD SYNC)
+// ==========================================
+export const getCourseContentsAction = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => d as { materialSlug?: string; moduleIndex?: number })
+  .handler(async ({ data }) => {
+    try {
+      const contents = await TursoRepository.getCourseContents(data.materialSlug, data.moduleIndex);
+      return { contents, success: true };
+    } catch (e: any) {
+      return { contents: [], success: false, error: e.message };
+    }
+  });
+
+export const saveCourseContentAction = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: unknown) =>
+      d as {
+        id?: string;
+        materialSlug: string;
+        moduleIndex: number;
+        type: string;
+        title: string;
+        description?: string;
+        url: string;
+        fileSize?: string;
+        duration?: string;
+        isDownloadable?: boolean;
+      }
+  )
+  .handler(async ({ data }) => {
+    try {
+      const item = await TursoRepository.saveCourseContent(data);
+      return { item, success: true };
+    } catch (e: any) {
+      return { item: null, success: false, error: e.message };
+    }
+  });
+
+export const deleteCourseContentAction = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => d as { id: string })
+  .handler(async ({ data }) => {
+    try {
+      await TursoRepository.deleteCourseContent(data.id);
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  });
+

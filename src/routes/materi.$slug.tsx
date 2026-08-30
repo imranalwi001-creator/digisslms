@@ -15,7 +15,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CoursePlayerTabs } from "@/components/lms/CoursePlayerTabs";
 import { FocusedLMSVideoPlayer } from "@/components/lms/FocusedLMSVideoPlayer";
-import { getStoredContents } from "@/lib/course-content";
+import { getStoredContents, syncCloudContents } from "@/lib/course-content";
 import {
   listPublishedQuizzesForMaterial,
   getQuizForStudent,
@@ -317,6 +317,15 @@ function MaterialDetailPage() {
     }
   };
 
+  const [contentVersion, setContentVersion] = useState(0);
+
+  useEffect(() => {
+    syncCloudContents(slug, selectedModuleIndex);
+    const handleUpdate = () => setContentVersion((v) => v + 1);
+    window.addEventListener("digisschool:content_updated", handleUpdate);
+    return () => window.removeEventListener("digisschool:content_updated", handleUpdate);
+  }, [slug, selectedModuleIndex]);
+
   const activeModuleVideoUrl = useMemo(() => {
     if (!material) return "";
     const contents = getStoredContents(slug, selectedModuleIndex);
@@ -329,7 +338,7 @@ function MaterialDetailPage() {
       "https://www.youtube.com/watch?v=8popR3x-VMY",
     ];
     return fallbackUrls[selectedModuleIndex % fallbackUrls.length];
-  }, [slug, selectedModuleIndex, material]);
+  }, [slug, selectedModuleIndex, material, contentVersion]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
