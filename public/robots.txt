@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /profil
+
+Sitemap: https://ruangblajar.lovable.app/sitemap.xml
