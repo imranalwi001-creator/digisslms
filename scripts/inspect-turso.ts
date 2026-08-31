@@ -23,14 +23,12 @@ const client = createClient({
 });
 
 async function inspect() {
-  const tables = await client.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");
-  console.log("=== DAFTAR TABEL DI TURSO ===");
-  for (const t of tables.rows) {
-    const tableName = String(t.name);
-    if (tableName.startsWith("_")) continue;
-    const countRes = await client.execute(`SELECT COUNT(*) as total FROM "${tableName}";`);
-    console.log(`- ${tableName} (Jumlah baris data: ${countRes.rows[0].total})`);
-  }
+  const p = await client.execute("PRAGMA table_info(profiles);");
+  console.log("profiles columns:", p.rows.map(r => r.name));
+  const u = await client.execute("PRAGMA table_info(users);");
+  console.log("users columns:", u.rows.map(r => r.name));
+  const up = await client.execute("PRAGMA table_info(user_profiles);");
+  console.log("user_profiles columns:", up.rows.map(r => r.name));
 }
 
 inspect();
