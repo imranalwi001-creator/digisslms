@@ -46,12 +46,12 @@ import {
 export const Route = createFileRoute("/admin/analitik")({
   head: () => ({
     meta: [
-      { title: "Analitik kelas — Continuum LMS" },
+      { title: "Analitik kelas — Digisschool LMS" },
       {
         name: "description",
-        content: "Tren kehadiran, perkembangan tiap siswa, dan ringkasan jurnal mengajar Digital Class.",
+        content: "Metrik keterlibatan, retensi mingguan, dan evaluasi hasil belajar siswa per mata pelajaran.",
       },
-      { property: "og:title", content: "Analitik kelas — Continuum LMS" },
+      { property: "og:title", content: "Analitik kelas — Digisschool LMS" },
       { property: "og:description", content: "Pantau perkembangan kelas dan siswa dari waktu ke waktu." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

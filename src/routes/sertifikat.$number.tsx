@@ -10,9 +10,9 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const Route = createFileRoute("/sertifikat/$number")({
   head: () => ({
     meta: [
-      { title: "Verifikasi Sertifikat — Continuum LMS" },
-      { name: "description", content: "Verifikasi keaslian sertifikat digital Continuum LMS." },
-      { property: "og:title", content: "Verifikasi Sertifikat — Continuum LMS" },
+      { title: "Verifikasi Sertifikat — Digisschool LMS" },
+      { name: "description", content: "Verifikasi keaslian sertifikat digital Digisschool LMS." },
+      { property: "og:title", content: "Verifikasi Sertifikat — Digisschool LMS" },
       { property: "og:description", content: "Verifikasi keaslian sertifikat digital." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -64,7 +64,7 @@ function CertificateVerificationPage() {
                 <p className="text-sm font-medium text-primary">Terverifikasi</p>
                 <h1 className="mt-1 text-2xl font-bold tracking-tight">Sertifikat Digital Resmi</h1>
                 <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-                  Sertifikat ini diterbitkan oleh Continuum LMS dan dapat diverifikasi secara publik.
+                  Sertifikat ini diterbitkan oleh Digisschool LMS dan dapat diverifikasi secara publik.
                 </p>
 
                 <div className="mt-8 space-y-3 rounded-2xl bg-muted/40 p-5 text-left">

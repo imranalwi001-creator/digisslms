@@ -22,9 +22,9 @@ import {
 export const Route = createFileRoute("/admin/pengaturan")({
   head: () => ({
     meta: [
-      { title: "Pengaturan situs — Admin Continuum LMS" },
+      { title: "Pengaturan situs — Admin Digisschool LMS" },
       { name: "description", content: "Ubah logo, nama brand, banner, dan seluruh konten halaman utama LMS." },
-      { property: "og:title", content: "Pengaturan situs — Admin Continuum LMS" },
+      { property: "og:title", content: "Pengaturan situs — Admin Digisschool LMS" },
       { property: "og:description", content: "Kustomisasi tampilan dan konten halaman utama LMS." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -29,9 +29,9 @@ import { deleteJournal, fetchJournals, formatDay, saveJournal, type Journal } fr
 export const Route = createFileRoute("/admin/jurnal")({
   head: () => ({
     meta: [
-      { title: "Jurnal harian mengajar — Continuum LMS" },
+      { title: "Jurnal harian mengajar — Digisschool LMS" },
       { name: "description", content: "Catat kegiatan, hambatan, dan refleksi pembelajaran harian Digital Class." },
-      { property: "og:title", content: "Jurnal harian mengajar — Continuum LMS" },
+      { property: "og:title", content: "Jurnal harian mengajar — Digisschool LMS" },
       { property: "og:description", content: "Dokumentasi harian proses pembelajaran di kelas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

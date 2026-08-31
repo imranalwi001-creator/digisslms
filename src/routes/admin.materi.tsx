@@ -46,9 +46,9 @@ import {
 export const Route = createFileRoute("/admin/materi")({
   head: () => ({
     meta: [
-      { title: "Kelola Materi — Admin Continuum LMS" },
+      { title: "Kelola Materi — Admin Digisschool LMS" },
       { name: "description", content: "Tambah, ubah, dan hapus materi pembelajaran serta pantau statistik peserta." },
-      { property: "og:title", content: "Kelola Materi — Admin Continuum LMS" },
+      { property: "og:title", content: "Kelola Materi — Admin Digisschool LMS" },
       { property: "og:description", content: "CRUD materi pembelajaran dan statistik penyelesaian tiap materi." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -33,12 +33,12 @@ import {
 export const Route = createFileRoute("/admin/periode")({
   head: () => ({
     meta: [
-      { title: "Tahun ajaran & semester — Admin Continuum LMS" },
+      { title: "Tahun ajaran & semester — Admin Digisschool LMS" },
       {
         name: "description",
         content: "Atur tahun pembelajaran dan semester aktif, serta kelola arsip periode lampau untuk laporan.",
       },
-      { property: "og:title", content: "Tahun ajaran & semester — Admin Continuum LMS" },
+      { property: "og:title", content: "Tahun ajaran & semester — Admin Digisschool LMS" },
       { property: "og:description", content: "Kelola periode aktif dan arsip tahun ajaran pada LMS." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

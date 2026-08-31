@@ -68,7 +68,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               <Leaf className="w-9 h-9 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-semibold text-foreground tracking-tight" style={{ lineHeight: "1.2" }}>
-              Selamat datang di Continuum LMS
+              Selamat datang di Digisschool LMS
             </h1>
             <p className="text-sm text-muted-foreground mt-3 mx-auto max-w-[280px]" style={{ textWrap: "pretty" }}>
               Ruang belajar yang tenang. Tanpa gangguan, tanpa tekanan — hanya Anda dan materi hari ini.

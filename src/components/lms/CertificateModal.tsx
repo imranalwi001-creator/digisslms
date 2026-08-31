@@ -65,7 +65,7 @@ export function CertificateModal({
             </span>
 
             <h3 className="font-display text-2xl sm:text-3xl font-bold text-foreground mt-3">
-              Continuum Learning Academy
+              Digisschool Learning Academy
             </h3>
 
             <p className="text-xs text-muted-foreground mt-3">Diberikan secara resmi kepada:</p>

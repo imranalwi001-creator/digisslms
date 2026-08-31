@@ -78,7 +78,7 @@ export const Route = createFileRoute("/materi/$slug")({
                 timeRequired: material.duration,
                 provider: {
                   "@type": "Organization",
-                  name: "Continuum LMS",
+                  name: "Digisschool LMS",
                   url: SITE_URL,
                 },
                 hasPart: material.moduleList.map((name, i) => ({

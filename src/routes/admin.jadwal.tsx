@@ -88,9 +88,9 @@ function MaterialLink({ value, catalogTitle }: { value: string; catalogTitle?: s
 export const Route = createFileRoute("/admin/jadwal")({
   head: () => ({
     meta: [
-      { title: "Jadwal pembelajaran — Continuum LMS" },
+      { title: "Jadwal pembelajaran — Digisschool LMS" },
       { name: "description", content: "Susun jadwal mengajar mingguan Digital Class untuk kelas 7, 8, dan 9." },
-      { property: "og:title", content: "Jadwal pembelajaran — Continuum LMS" },
+      { property: "og:title", content: "Jadwal pembelajaran — Digisschool LMS" },
       { property: "og:description", content: "Kelola jadwal mingguan tiap kelas dengan rapi." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

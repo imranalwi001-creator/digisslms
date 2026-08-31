@@ -310,7 +310,7 @@ export function CoursePlayerTabs({
       await postAnswerFn({
         data: {
           questionId,
-          author: "Siswa Continuum",
+          author: "Santri Digisschool",
           avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Student",
           text,
         },

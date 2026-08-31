@@ -105,7 +105,7 @@ export const defaultSettings: SiteSettings = {
   ],
   faqs: [
     {
-      q: "Apakah Continuum LMS gratis untuk siswa?",
+      q: "Apakah Digisschool LMS gratis untuk siswa?",
       a: "Ya. Siswa dapat mendaftar, mengikuti kelas, dan memantau progres tanpa biaya. Sekolah dapat meminta fitur pengelolaan tambahan.",
     },
     {
@@ -144,7 +144,7 @@ export function rowToSettings(row: any): SiteSettings {
   if (!row) return defaultSettings;
   const brandName = (row.brand_name && !row.brand_name.toLowerCase().includes("continuum")) 
     ? row.brand_name 
-    : "Digisschool";
+    : "Digisschool LMS";
   return {
     brandName,
     logoUrl: row.logo_url || defaultSettings.logoUrl,

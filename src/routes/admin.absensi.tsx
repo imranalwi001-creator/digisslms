@@ -45,9 +45,9 @@ import {
 export const Route = createFileRoute("/admin/absensi")({
   head: () => ({
     meta: [
-      { title: "Absensi kelas — Continuum LMS" },
+      { title: "Absensi kelas — Digisschool LMS" },
       { name: "description", content: "Rekap kehadiran siswa per pertemuan secara real-time untuk kelas 7, 8, dan 9." },
-      { property: "og:title", content: "Absensi kelas — Continuum LMS" },
+      { property: "og:title", content: "Absensi kelas — Digisschool LMS" },
       { property: "og:description", content: "Catat dan rekap kehadiran siswa tiap pertemuan." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -242,7 +242,7 @@ function AttendancePage({ userId }: { userId: string }) {
         subtitle: `Digital Class · ${sessions.length} pertemuan · rata-rata kehadiran ${attendanceRate(gradeRecords)}%`,
         head,
         rows,
-        footer: `Dicetak ${formatDay(today())} — Continuum LMS`,
+        footer: `Dicetak ${formatDay(today())} — Digisschool LMS`,
       });
     } catch (err: any) {
       toast.error(err.message || "Gagal menyiapkan PDF");

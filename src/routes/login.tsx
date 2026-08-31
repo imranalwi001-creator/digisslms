@@ -40,22 +40,22 @@ async function getSupabase() {
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Masuk & Daftar Kelas Digital — Continuum LMS" },
+      { title: "Masuk & Daftar Kelas Digital — Digisschool LMS" },
       {
         name: "description",
         content:
-          "Masuk atau daftar akun Continuum LMS untuk siswa SMP kelas 7-9: akses materi Kelas Digital, kuis, tugas, dan sertifikat.",
+          "Masuk atau daftar akun Digisschool LMS untuk siswa SMP kelas 7-9: akses materi Kelas Digital, kuis, tugas, dan sertifikat.",
       },
-      { property: "og:title", content: "Masuk & Daftar Kelas Digital — Continuum LMS" },
+      { property: "og:title", content: "Masuk & Daftar Kelas Digital — Digisschool LMS" },
       {
         property: "og:description",
-        content: "Buat akun siswa dan mulai belajar Kelas Digital SMP kelas 7-9 di Continuum LMS.",
+        content: "Buat akun siswa dan mulai belajar Kelas Digital SMP kelas 7-9 di Digisschool LMS.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://ruangblajar.lovable.app/login" },
+      { property: "og:url", content: "https://digisschool.my.id/login" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://ruangblajar.lovable.app/login" }],
+    links: [{ rel: "canonical", href: "https://digisschool.my.id/login" }],
   }),
   component: LoginPage,
 });
@@ -284,7 +284,7 @@ function LoginPage() {
           {isSignUp && (
             <>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Dengan mendaftar, Anda setuju data belajar disimpan untuk memantau progres di Continuum LMS.
+                Dengan mendaftar, Anda setuju data belajar disimpan untuk memantau progres di Digisschool LMS.
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Pendaftaran ini khusus siswa. <span className="font-medium text-foreground">Guru</span> tidak

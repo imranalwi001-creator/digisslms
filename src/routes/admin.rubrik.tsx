@@ -40,12 +40,12 @@ import { useTerms, termLabel } from "@/lib/terms";
 export const Route = createFileRoute("/admin/rubrik")({
   head: () => ({
     meta: [
-      { title: "Rubrik penilaian — Continuum LMS" },
+      { title: "Rubrik penilaian — Digisschool LMS" },
       {
         name: "description",
         content: "Buat rubrik penilaian per materi ajar dengan kriteria berbobot, lalu nilai setiap siswa secara terstruktur.",
       },
-      { property: "og:title", content: "Rubrik penilaian — Continuum LMS" },
+      { property: "og:title", content: "Rubrik penilaian — Digisschool LMS" },
       { property: "og:description", content: "Rubrik berbobot per materi ajar untuk penilaian siswa yang konsisten." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

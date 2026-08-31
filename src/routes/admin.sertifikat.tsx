@@ -13,10 +13,10 @@ import { useServerFn } from "@tanstack/react-start";
 export const Route = createFileRoute("/admin/sertifikat")({
   head: () => ({
     meta: [
-      { title: "Sertifikat — Admin Continuum LMS" },
+      { title: "Sertifikat — Admin Digisschool LMS" },
       { name: "description", content: "Lihat dan verifikasi sertifikat yang diterbitkan." },
-      { property: "og:title", content: "Sertifikat — Admin Continuum LMS" },
-      { property: "og:description", content: "Daftar sertifikat siswa." },
+      { property: "og:title", content: "Sertifikat — Admin Digisschool LMS" },
+      { property: "og:description", content: "Daftar sertifikat santri." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

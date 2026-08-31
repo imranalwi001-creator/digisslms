@@ -249,7 +249,7 @@ export function RoleShowcase() {
 /* ─── FAQ ─── */
 const faqs = [
   {
-    q: "Apakah Continuum LMS gratis untuk siswa?",
+    q: "Apakah Digisschool LMS gratis untuk siswa?",
     a: "Ya. Siswa dapat mendaftar, mengikuti kelas, dan memantau progres tanpa biaya. Sekolah dapat meminta fitur pengelolaan tambahan.",
   },
   {

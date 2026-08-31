@@ -29,10 +29,10 @@ import { useAdminAction } from "@/lib/admin-action";
 export const Route = createFileRoute("/admin/pengumuman")({
   head: () => ({
     meta: [
-      { title: "Pengumuman — Admin Continuum LMS" },
-      { name: "description", content: "Buat dan kelola pengumuman yang tampil di dashboard siswa." },
-      { property: "og:title", content: "Pengumuman — Admin Continuum LMS" },
-      { property: "og:description", content: "Kelola pengumuman untuk seluruh siswa." },
+      { title: "Pengumuman — Admin Digisschool LMS" },
+      { name: "description", content: "Buat dan kelola pengumuman yang tampil di dashboard santri." },
+      { property: "og:title", content: "Pengumuman — Admin Digisschool LMS" },
+      { property: "og:description", content: "Kelola pengumuman untuk seluruh santri." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

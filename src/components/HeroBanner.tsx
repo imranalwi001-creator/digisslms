@@ -48,7 +48,7 @@ export function HeroBanner() {
         touchX.current = null;
       }}
       aria-roledescription="carousel"
-      aria-label="Banner Continuum LMS"
+      aria-label="Banner Digisschool LMS"
     >
       {/* Slides — crossfade + Ken Burns */}
       {slides.map((s, i) => (

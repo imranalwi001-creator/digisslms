@@ -96,7 +96,7 @@ export function ERaporModal({
             {/* School Header */}
             <div className="text-center border-b-2 border-primary/20 pb-6 mb-6">
               <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-                SMP CONTINUUM LEARNING ACADEMY
+                SMP DIGITAL ISLAMIC BOARDING SCHOOL (DIGISSCHOOL)
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 Laporan Hasil Belajar Peserta Didik · Tahun Ajaran {academicYear}

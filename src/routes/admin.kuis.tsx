@@ -42,9 +42,9 @@ const emptyQuestion = (): QuestionInput => ({
 export const Route = createFileRoute("/admin/kuis")({
   head: () => ({
     meta: [
-      { title: "Kelola Kuis — Admin Continuum LMS" },
+      { title: "Kelola Kuis — Admin Digisschool LMS" },
       { name: "description", content: "Buat, ubah, dan publikasikan kuis untuk materi pembelajaran." },
-      { property: "og:title", content: "Kelola Kuis — Admin Continuum LMS" },
+      { property: "og:title", content: "Kelola Kuis — Admin Digisschool LMS" },
       { property: "og:description", content: "Manajemen kuis untuk materi pembelajaran." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

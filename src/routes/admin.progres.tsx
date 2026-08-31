@@ -36,12 +36,12 @@ import { semesterLabel, useTerms } from "@/lib/terms";
 export const Route = createFileRoute("/admin/progres")({
   head: () => ({
     meta: [
-      { title: "Progres siswa — Continuum LMS" },
+      { title: "Progres siswa — Digisschool LMS" },
       {
         name: "description",
         content: "Visualisasi perkembangan siswa: kehadiran, nilai kuis, tugas, dan penilaian rubrik per periode.",
       },
-      { property: "og:title", content: "Progres siswa — Continuum LMS" },
+      { property: "og:title", content: "Progres siswa — Digisschool LMS" },
       { property: "og:description", content: "Pantau kehadiran dan capaian nilai setiap siswa dalam satu dasbor." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

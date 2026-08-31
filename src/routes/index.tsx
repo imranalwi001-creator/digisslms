@@ -28,8 +28,8 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
   head: () => ({
     meta: [
-      { title: "Continuum LMS — Belajar konsisten setiap hari" },
-      { name: "description", content: "Platform belajar online yang tenang dan fokus. Ikuti kelas, pantau progres belajar, dan jaga rutinitas belajar harian Anda." },
+      { title: "Digisschool LMS — Platform Pembelajaran Digital Terpadu" },
+      { name: "description", content: "Platform belajar online santri Digital Islamic Boarding School. Ikuti kelas, pantau progres belajar, dan jaga rutinitas harian." },
     ],
   }),
 });

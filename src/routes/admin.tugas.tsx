@@ -27,9 +27,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export const Route = createFileRoute("/admin/tugas")({
   head: () => ({
     meta: [
-      { title: "Kelola Tugas — Admin Continuum LMS" },
+      { title: "Kelola Tugas — Admin Digisschool LMS" },
       { name: "description", content: "Buat, ubah, dan nilai tugas siswa." },
-      { property: "og:title", content: "Kelola Tugas — Admin Continuum LMS" },
+      { property: "og:title", content: "Kelola Tugas — Admin Digisschool LMS" },
       { property: "og:description", content: "Manajemen tugas dan penilaian siswa." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

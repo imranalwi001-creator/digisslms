@@ -76,10 +76,10 @@ import {
 export const Route = createFileRoute("/admin/siswa")({
   head: () => ({
     meta: [
-      { title: "Kelola Siswa — Admin Continuum LMS" },
-      { name: "description", content: "Tambah, ubah, dan hapus data siswa beserta progres belajar dan peran akun." },
-      { property: "og:title", content: "Kelola Siswa — Admin Continuum LMS" },
-      { property: "og:description", content: "CRUD data siswa, kelas, dan peran akun Continuum LMS." },
+      { title: "Kelola Siswa — Admin Digisschool LMS" },
+      { name: "description", content: "Daftar santri dan akun pengguna Digisschool LMS." },
+      { property: "og:title", content: "Kelola Siswa — Admin Digisschool LMS" },
+      { property: "og:description", content: "CRUD data siswa, kelas, dan peran akun Digisschool LMS." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

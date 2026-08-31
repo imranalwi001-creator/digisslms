@@ -20,12 +20,12 @@ import {
 export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
-      { title: "Dashboard Admin — Continuum LMS" },
+      { title: "Dashboard Admin — Digisschool LMS" },
       {
         name: "description",
-        content: "Ringkasan operasional LMS: jumlah siswa, pendaftaran kelas, modul selesai, dan materi terpopuler.",
+        content: "Ringkasan kelas digital, santri aktif, progres belajar, dan aktivitas terbaru di Digisschool LMS.",
       },
-      { property: "og:title", content: "Dashboard Admin — Continuum LMS" },
+      { property: "og:title", content: "Dashboard Admin — Digisschool LMS" },
       { property: "og:description", content: "Ringkasan operasional LMS untuk administrator." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
