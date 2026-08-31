@@ -447,15 +447,16 @@ function AdminStudents({
             </Button>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-border/60 bg-background">
+          <div className="overflow-x-auto rounded-xl border border-border/80 bg-background shadow-xs">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Siswa</TableHead>
                   <TableHead className="hidden lg:table-cell">Kontak</TableHead>
                   <TableHead>Peran</TableHead>
-                  <TableHead className="hidden md:table-cell">Kelas</TableHead>
-                  <TableHead className="hidden md:table-cell">Modul</TableHead>
+                  <TableHead className="hidden md:table-cell">Tingkat Kelas</TableHead>
+                  <TableHead className="hidden md:table-cell">Materi Diikuti</TableHead>
+                  <TableHead className="hidden md:table-cell">Modul Selesai</TableHead>
                   <TableHead>Progres</TableHead>
                   <TableHead className="hidden lg:table-cell">Aktivitas</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
@@ -465,22 +466,22 @@ function AdminStudents({
                 {filtered.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>
-                      <p className="font-medium">{r.displayName || "Siswa tanpa nama"}</p>
+                      <p className="font-semibold text-foreground">{r.displayName || "Siswa tanpa nama"}</p>
                       <p className="text-xs text-muted-foreground">
-                        {r.grade ? `Kelas ${r.grade}` : "Kelas —"} · Bergabung {formatDate(r.createdAt)}
+                        Bergabung {formatDate(r.createdAt)}
                       </p>
                       {r.status !== "active" && (
-                        <Badge variant="destructive" className="mt-1">
+                        <Badge variant="destructive" className="mt-1 text-[10px]">
                           Nonaktif
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
-                      <p>{r.email || "—"}</p>
-                      <p className="text-xs">{r.phone || r.school || ""}</p>
+                    <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
+                      <p className="font-medium text-foreground/90">{r.email || "—"}</p>
+                      <p className="text-[11px] mt-0.5">{r.phone || r.school || ""}</p>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={r.role === "student" ? "secondary" : "default"} className="gap-1">
+                      <Badge variant={r.role === "student" ? "secondary" : "default"} className="gap-1 text-xs">
                         {r.role === "admin" ? (
                           <ShieldCheck className="h-3 w-3" />
                         ) : r.role === "guru" ? (
@@ -491,14 +492,21 @@ function AdminStudents({
                         {r.role === "admin" ? "Admin" : r.role === "guru" ? "Guru" : "Siswa"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">{r.enrollments}</TableCell>
                     <TableCell className="hidden md:table-cell">
+                      <Badge variant="outline" className="font-mono text-xs font-semibold bg-surface-alt">
+                        {r.grade ? `Kelas ${r.grade}` : "Kelas —"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="font-mono text-xs text-muted-foreground">{r.enrollments} materi</span>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell font-mono text-xs text-muted-foreground">
                       {r.completedModules}/{r.totalModules}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Progress value={r.progress} className="h-1.5 w-16" />
-                        <span className="text-xs text-muted-foreground">{r.progress}%</span>
+                        <span className="text-xs font-mono text-muted-foreground">{r.progress}%</span>
                       </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
@@ -543,7 +551,7 @@ function AdminStudents({
                 ))}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={9} className="py-8 text-center text-sm text-muted-foreground">
                       Tidak ada siswa yang cocok.
                     </TableCell>
                   </TableRow>

@@ -145,20 +145,30 @@ export function DashboardShell({ role: roleProp, title, subtitle, actions, child
     );
   }, [allItems, query]);
 
-  // Longest matching path = active item (handles nested routes and search params)
+  // Determine active item: exact match with query first, then exact path, then longest prefix match
   const activePath = useMemo(() => {
     const full = location.pathname + (location.search ? location.search : "");
     const direct = allItems.find((i) => i.to === full);
     if (direct) return direct.to;
 
     const path = location.pathname;
+    // Exact path without query string
+    const exact = allItems.find((i) => i.to.split("?")[0] === path && !i.to.includes("?"));
+    if (exact) return exact.to;
+
+    // Subpath matching for child pages
     let best = "";
     for (const i of allItems) {
-      if (path === i.to || (i.to.startsWith(path) && !i.to.includes("?"))) {
-        if (i.to.length > best.length) best = i.to;
+      const baseTo = i.to.split("?")[0];
+      if (baseTo === "/admin" || baseTo === "/dashboard") {
+        if (path === baseTo) return i.to;
+        continue;
+      }
+      if (path.startsWith(baseTo + "/") && baseTo.length > best.length) {
+        best = i.to;
       }
     }
-    return best || allItems[0]?.to || "";
+    return best || (path.startsWith("/admin") ? "/admin" : path.startsWith("/dashboard") ? "/dashboard" : allItems[0]?.to || "");
   }, [allItems, location.pathname, location.search]);
 
   const closeMobile = () => {
@@ -337,14 +347,17 @@ export function DashboardShell({ role: roleProp, title, subtitle, actions, child
         </div>
       </nav>
 
-      <div className="border-t border-border/60 p-3">
+      <div className="border-t border-border/60 p-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] bg-background shrink-0">
         <Button
-          variant="ghost"
-          className={["w-full gap-3 text-muted-foreground", mini ? "justify-center px-0" : "justify-start"].join(" ")}
+          variant="outline"
+          className={[
+            "w-full gap-3 font-semibold text-destructive border-destructive/25 hover:bg-destructive/10 hover:text-destructive transition-colors rounded-xl shadow-2xs",
+            mini ? "justify-center px-0" : "justify-start px-3",
+          ].join(" ")}
           onClick={handleSignOut}
-          title="Keluar"
+          title="Keluar dari akun"
         >
-          <LogOut className="w-[18px] h-[18px] shrink-0" />
+          <LogOut className="w-[18px] h-[18px] shrink-0 text-destructive" />
           {!mini && "Keluar"}
         </Button>
       </div>
@@ -363,7 +376,7 @@ export function DashboardShell({ role: roleProp, title, subtitle, actions, child
       </aside>
 
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-[60] lg:hidden">
           <div
             className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
             onClick={closeMobile}
@@ -374,7 +387,7 @@ export function DashboardShell({ role: roleProp, title, subtitle, actions, child
             role="dialog"
             aria-modal="true"
             aria-label="Menu navigasi"
-            className="absolute inset-y-0 left-0 flex w-72 flex-col bg-background shadow-xl"
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-background shadow-2xl"
           >
             <button
               className="absolute right-3 top-4 z-10 rounded-lg p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"

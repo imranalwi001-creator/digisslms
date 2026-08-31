@@ -467,9 +467,9 @@ function StudentProfilePage({
                     
                     {/* Bar */}
                     <div
-                      className={`w-full rounded-t-xl transition-all duration-300 ${
+                      className={`w-full rounded-t-md transition-all duration-300 ${
                         hasActivity
-                          ? "bg-gradient-to-t from-primary to-emerald-400 group-hover:brightness-110 shadow-xs"
+                          ? "bg-primary group-hover:brightness-105"
                           : "bg-muted/60"
                       }`}
                       style={{ height: `${heightPercent}%` }}
@@ -488,7 +488,7 @@ function StudentProfilePage({
           {/* ========================================================================= */}
           {/* 🏅 LENCANA PRESTASI (BADGES) */}
           {/* ========================================================================= */}
-          <section className="rounded-3xl border border-border/70 bg-card p-6 shadow-xs">
+          <section className="rounded-xl border border-border/80 bg-card p-6 shadow-xs">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -508,9 +508,9 @@ function StudentProfilePage({
               {derived.badges.map((b) => (
                 <div
                   key={b.key}
-                  className={`relative overflow-hidden rounded-2xl border p-4 transition-all duration-200 ${
+                  className={`relative overflow-hidden rounded-xl border p-4 transition-all duration-200 ${
                     b.earned
-                      ? "border-primary/40 bg-gradient-to-br from-primary/10 via-primary/5 to-card shadow-xs hover:border-primary/60"
+                      ? "border-border/80 bg-surface-alt shadow-xs hover:border-primary/50"
                       : "border-border/60 bg-muted/20 opacity-60 grayscale"
                   }`}
                 >

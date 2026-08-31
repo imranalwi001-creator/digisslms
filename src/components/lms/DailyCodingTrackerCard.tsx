@@ -123,7 +123,7 @@ export function DailyCodingTrackerCard({ userId }: DailyCodingTrackerCardProps) 
   const progressPercent = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
 
   return (
-    <div className="rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card to-primary/5 p-5 sm:p-6 shadow-xs space-y-4">
+    <div className="rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">

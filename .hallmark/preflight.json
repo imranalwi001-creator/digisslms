@@ -1,0 +1,11 @@
+{
+  "scannedAt": "2026-08-31T23:37:35+08:00",
+  "fontStack": "Newsreader (Display Serif) + Plus Jakarta Sans (Body) + Geist Mono (Tabular/Code)",
+  "palette": "OKLCH Editorial Warm Ochre / Clean Paper (Light: 0.985 0.004 85, Dark: 0.13 0.012 60)",
+  "motion": "tw-animate-css (subtle cubic-bezier transitions, zero floaty orbs / glow pulses)",
+  "spacing": "Tailwind 4-pt scale",
+  "framework": "TanStack Start / React 19 / Nitro Engine",
+  "genre": "editorial",
+  "macrostructure": "Workbench",
+  "theme": "Editorial-Ochre"
+}

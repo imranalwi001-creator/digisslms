@@ -28,7 +28,7 @@ export function ProfileBanner({
 }) {
   const src = useProfileMedia(value);
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-r from-emerald-900 via-teal-950 to-zinc-900 ${className}`}>
+    <div className={`relative overflow-hidden bg-surface-alt border-b border-border/80 ${className}`}>
       {src ? (
         <img
           src={src}
@@ -37,11 +37,11 @@ export function ProfileBanner({
           loading="lazy"
         />
       ) : (
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/30 via-emerald-900/40 to-zinc-950">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute inset-0 bg-secondary/30">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
       {children}
     </div>
   );
@@ -51,7 +51,7 @@ export function ProfileAvatar({
   value,
   name,
   className = "h-24 w-24 sm:h-28 sm:w-28",
-  ringClass = "ring-4 ring-background shadow-2xl",
+  ringClass = "ring-4 ring-background shadow-md",
 }: {
   value?: string | null;
   name?: string | null;
@@ -61,7 +61,7 @@ export function ProfileAvatar({
   const src = useProfileMedia(value);
   return (
     <div
-      className={`relative flex items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-primary/20 via-primary/10 to-muted border border-border/80 text-2xl sm:text-3xl font-extrabold text-primary ${ringClass} ${className}`}
+      className={`relative flex items-center justify-center overflow-hidden rounded-xl bg-card border border-border text-2xl sm:text-3xl font-display font-semibold text-primary ${ringClass} ${className}`}
     >
       {src ? (
         <img src={src} alt={name || "Foto profil"} className="h-full w-full object-cover" />

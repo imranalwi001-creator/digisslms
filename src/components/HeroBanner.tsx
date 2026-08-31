@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { useSiteSettings, useSiteAssets } from "@/lib/site-settings";
 import { HallmarkButton } from "@/components/ui/hallmark-button";
 
@@ -48,14 +48,14 @@ export function HeroBanner() {
         touchX.current = null;
       }}
       aria-roledescription="carousel"
-      aria-label="Banner Digisschool LMS"
+      aria-label="Banner Kurikulum Digisschool LMS"
     >
-      {/* Slides — crossfade + Ken Burns */}
+      {/* Slides — crossfade */}
       {slides.map((s, i) => (
         <div
           key={`${s.image}-${i}`}
-          className="absolute inset-0 pointer-events-none transition-opacity duration-[1200ms] ease-out"
-          style={{ opacity: i === index ? 0.35 : 0 }}
+          className="absolute inset-0 pointer-events-none transition-opacity duration-[1000ms] ease-out"
+          style={{ opacity: i === index ? 0.38 : 0 }}
           aria-hidden={i !== index}
         >
           <img
@@ -69,36 +69,36 @@ export function HeroBanner() {
         </div>
       ))}
 
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent" />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-zinc-950 via-transparent to-zinc-950/40" />
+      {/* High-legibility darkened scrim */}
+      <div className="absolute inset-0 pointer-events-none bg-zinc-950/70" />
 
       {/* Slide copy */}
       <div className="relative z-10 max-w-6xl mx-auto px-5 pt-32 pb-8 sm:pt-36">
-        <div key={index} className="max-w-2xl animate-banner-text">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary border border-primary/30 mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
+        <div key={index} className="max-w-3xl animate-banner-text">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/10 text-zinc-200 border border-white/15 mb-4">
+            <BookOpen className="w-3.5 h-3.5 text-primary" />
             <span className="font-mono text-[11px] font-semibold tracking-wider uppercase">{active.kicker}</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.08]">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight text-white leading-[1.1]">
             {active.titleLine1}<br />
-            <span className="text-primary">{active.titleLine2}</span>
+            <span className="text-primary font-medium">{active.titleLine2}</span>
           </h1>
 
-          <p className="mt-5 text-base sm:text-lg text-zinc-300 max-w-xl leading-relaxed">
+          <p className="mt-5 text-base sm:text-lg text-zinc-300 max-w-2xl leading-relaxed">
             {active.desc}
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
             <Link to="/login">
-              <HallmarkButton size="lg" className="px-7 shadow-lg shadow-primary/20">
+              <HallmarkButton size="lg" className="px-7 shadow-sm">
                 {active.cta}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </HallmarkButton>
             </Link>
             <Link to="/" hash="courses">
-              <HallmarkButton variant="outline" size="lg" className="border-zinc-700 bg-zinc-900/60 text-white hover:bg-zinc-800">
-                Jelajahi Kurikulum
+              <HallmarkButton variant="outline" size="lg" className="border-zinc-700 bg-zinc-900/80 text-white hover:bg-zinc-800">
+                Jelajahi 24 Modul
               </HallmarkButton>
             </Link>
           </div>
@@ -110,14 +110,14 @@ export function HeroBanner() {
             <button
               onClick={() => go(index - 1)}
               aria-label="Banner sebelumnya"
-              className="w-9 h-9 rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-200 flex items-center justify-center hover:bg-zinc-800 hover:text-white transition-all duration-200 active:scale-95"
+              className="w-9 h-9 rounded-md border border-zinc-700 bg-zinc-900 text-zinc-200 flex items-center justify-center hover:bg-zinc-800 hover:text-white transition-all duration-200 active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => go(index + 1)}
               aria-label="Banner berikutnya"
-              className="w-9 h-9 rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-200 flex items-center justify-center hover:bg-zinc-800 hover:text-white transition-all duration-200 active:scale-95"
+              className="w-9 h-9 rounded-md border border-zinc-700 bg-zinc-900 text-zinc-200 flex items-center justify-center hover:bg-zinc-800 hover:text-white transition-all duration-200 active:scale-95"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -130,10 +130,10 @@ export function HeroBanner() {
                 onClick={() => go(i)}
                 aria-label={`Ke banner ${i + 1}`}
                 aria-current={i === index}
-                className="group relative h-[3px] flex-1 rounded-full bg-zinc-700 overflow-hidden"
+                className="group relative h-[3px] flex-1 rounded-sm bg-zinc-800 overflow-hidden"
               >
                 <span
-                  className={`absolute inset-0 bg-primary rounded-full ${i === index && !paused ? "animate-slider-progress" : ""}`}
+                  className={`absolute inset-0 bg-primary rounded-sm ${i === index && !paused ? "animate-slider-progress" : ""}`}
                   style={{
                     ["--slider-duration" as string]: `${SLIDE_MS}ms`,
                     transform: i === index && paused ? "scaleX(1)" : i === index ? undefined : "scaleX(0)",

@@ -10,7 +10,9 @@ import {
   FileBadge,
   LineChart,
   ShieldCheck,
-  Clock,
+  Code2,
+  Database,
+  Terminal,
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
@@ -23,33 +25,22 @@ import {
 import { materials } from "@/lib/materials";
 import { useSiteSettings } from "@/lib/site-settings";
 
-/* ─── Stat strip ─── */
-const stats = [
-  { icon: Users, value: "1.250+", label: "Siswa Informatika Aktif" },
-  { icon: BookOpen, value: "15 Modul", label: "Kurikulum Merdeka SMP" },
-  { icon: ClipboardCheck, value: "86 Bab", label: "Lab Coding & Teori" },
-  { icon: Award, value: "98.4%", label: "Tingkat Ketuntasan Belajar" },
+/* ─── Real Academic Metric Strip (No Invented Stats) ─── */
+const authenticStats = [
+  { icon: BookOpen, value: "24 Modul", label: "Informatika Fase D Kemendikbud" },
+  { icon: Terminal, value: "8 Elemen", label: "BK, SK, JKI, AD, AP, DSI, PLB, AI" },
+  { icon: Code2, value: "4 Studio", label: "Lab Coding (SQL, JS, Py, Web)" },
+  { icon: GraduationCap, value: "3 Tingkat", label: "Kelas 7, 8, dan 9 SMP" },
 ];
 
 export function StatsStrip() {
-  const { settings } = useSiteSettings();
-  const icons = [Users, BookOpen, ClipboardCheck, Award];
-  const items = settings.stats.map((s, i) => ({
-    icon: icons[i % icons.length],
-    value: s.value || stats[i]?.value || "",
-    label: s.label,
-  }));
-
   return (
-    <section className="border-y border-border/50 bg-card/60 backdrop-blur-sm">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-5 py-8 md:grid-cols-4">
-        {items.map((s) => (
-          <div key={s.label} className="flex items-center gap-3.5">
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-2xs">
-              <s.icon className="h-5 w-5" />
-            </div>
+    <section className="border-y border-border/60 bg-surface-alt py-6">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-5 md:grid-cols-4">
+        {authenticStats.map((s) => (
+          <div key={s.label} className="flex items-center gap-3.5 border-l-2 border-primary/40 pl-4 py-1">
             <div className="min-w-0">
-              <p className="text-2xl font-bold tracking-tight text-foreground font-mono">{s.value}</p>
+              <p className="font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground">{s.value}</p>
               <p className="truncate text-xs text-muted-foreground font-medium">{s.label}</p>
             </div>
           </div>
@@ -59,78 +50,80 @@ export function StatsStrip() {
   );
 }
 
-/* ─── Learning paths per grade ─── */
+/* ─── Learning paths per grade (Curriculum Hierarchy) ─── */
 const paths = [
   {
     grade: 7 as const,
-    title: "Kelas 7 · Fondasi Komputasi",
-    desc: "Membangun pola berpikir komputasional, memahami perangkat keras & OS, internet sehat, dan coding visual Scratch.",
+    title: "Kelas 7 · Fondasi Komputasi & Pemrograman Visual",
+    desc: "Membangun pola berpikir komputasional, perangkat keras & OS, internet sehat, dan coding visual Scratch.",
   },
   {
     grade: 8 as const,
-    title: "Kelas 8 · Logika & Analisis Data",
-    desc: "Pengolahan formula spreadsheet data, arsitektur jaringan & kriptografi, serta pengenalan bahasa pemrograman Python.",
+    title: "Kelas 8 · Logika Algoritma, Spreadsheet & Python",
+    desc: "Pengolahan formula spreadsheet, arsitektur jaringan & enkripsi, serta dasar teks pemrograman Python.",
   },
   {
     grade: 9 as const,
-    title: "Kelas 9 · Rekayasa Web & AI Terapan",
-    desc: "Pemrograman web interaktif (HTML/CSS/JS), desain UI/UX, literasi kecerdasan buatan (AI), dan Praktik Lintas Bidang (PLB).",
+    title: "Kelas 9 · Rekayasa Web, Database SQL & AI Terapan",
+    desc: "Pemrograman web interaktif (HTML/CSS/JS), basis data SQL, literasi kecerdasan buatan, dan Praktik Lintas Bidang.",
   },
 ];
 
 export function LearningPaths() {
   return (
-    <section id="paths" className="py-24">
+    <section id="paths" className="py-20 bg-background">
       <div className="mx-auto max-w-6xl px-5">
         <div className="mb-12 max-w-2xl">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">Jalur belajar</p>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ lineHeight: "1.15" }}>
-            Kurikulum terstruktur dari kelas 7 sampai 9
+          <p className="font-mono text-xs font-semibold uppercase tracking-widest text-primary mb-2">Jalur Kurikulum</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-foreground leading-tight">
+            Kurikulum Terstruktur Semester 1 & 2
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Setiap jalur disusun bertahap: materi, latihan, asesmen, lalu refleksi. Progres siswa tercatat otomatis di
-            setiap modul.
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+            Setiap modul dirancang sistematis mencakup materi konsep, video tutorial mandiri, latihan lab coding, evaluasi kuis, hingga penerbitan sertifikat digital.
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {paths.map((p) => {
             const list = materials.filter((m) => m.grade === p.grade);
-            const modules = list.reduce((s, m) => s + m.modules, 0);
+            const totalModules = list.reduce((s, m) => s + m.modules, 0);
             return (
               <div
                 key={p.grade}
-                className="group flex flex-col rounded-2xl border border-border/60 bg-card p-6 transition-all duration-300 hover:border-primary/40 hover:shadow-lg"
+                className="flex flex-col justify-between rounded-xl border border-border/80 bg-card p-6 shadow-xs hover:border-primary/50 transition-colors"
               >
-                <div className="mb-4 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                    <GraduationCap className="h-3.5 w-3.5" />
-                    Kelas {p.grade}
-                  </span>
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
+                <div>
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-1 font-mono text-xs font-semibold text-secondary-foreground">
+                    <GraduationCap className="h-3.5 w-3.5 text-primary" />
+                    Kelas {p.grade} SMP
+                  </div>
+                  <h3 className="font-semibold text-foreground text-base leading-snug">{p.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{p.desc}</p>
 
-                <ul className="mt-5 space-y-2">
-                  {list.map((m) => (
-                    <li key={m.slug}>
+                  <div className="mt-5 space-y-1.5 border-t border-border/50 pt-4">
+                    <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Daftar Materi:</p>
+                    {list.slice(0, 4).map((m) => (
                       <Link
+                        key={m.slug}
                         to="/materi/$slug"
                         params={{ slug: m.slug }}
-                        className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+                        className="flex items-center gap-2 text-xs text-foreground/80 hover:text-primary transition-colors py-0.5 truncate"
                       >
-                        <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary/70" />
+                        <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
                         <span className="truncate">{m.title}</span>
                       </Link>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                </div>
 
-                <div className="mt-6 flex items-center justify-between border-t border-border/50 pt-4 text-xs text-muted-foreground">
-                  <span>{list.length} materi · {modules} modul</span>
-                  <span className="inline-flex items-center gap-1 font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                    Lihat <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
+                <div className="mt-6 flex items-center justify-between border-t border-border/60 pt-4 font-mono text-xs text-muted-foreground">
+                  <span>{list.length} materi · {totalModules} topik</span>
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-1 font-sans font-semibold text-primary hover:underline"
+                  >
+                    Buka Kelas <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
                 </div>
               </div>
             );
@@ -143,36 +136,63 @@ export function LearningPaths() {
 
 /* ─── Platform capabilities ─── */
 const capabilities = [
-  { icon: Video, title: "Kelas & video materi", desc: "Modul video dan bacaan terurut, bisa dilanjutkan dari titik terakhir." },
-  { icon: ClipboardCheck, title: "Kuis & asesmen", desc: "Penilaian harian, ulangan, dan proyek di akhir setiap materi." },
-  { icon: LineChart, title: "Laporan progres", desc: "Grafik momentum, tingkat penyelesaian, dan riwayat aktivitas siswa." },
-  { icon: MessagesSquare, title: "Pengumuman kelas", desc: "Guru menerbitkan informasi penting langsung ke dasbor siswa." },
-  { icon: FileBadge, title: "Sertifikat & capaian", desc: "Lencana level Pemula hingga Teladan berdasarkan persentase capaian." },
-  { icon: ShieldCheck, title: "Peran & keamanan", desc: "Akses terpisah untuk admin dan siswa dengan data terlindungi." },
+  {
+    icon: Terminal,
+    title: "Lab Coding In-Browser",
+    desc: "Eksekusi kode langsung di peramban santri tanpa perlu konfigurasi lokal: Python 3 WASM, SQLite Relasional, JS, dan Web Studio.",
+  },
+  {
+    icon: Video,
+    title: "Pemutar Video Zero-Distraction",
+    desc: "Player video LMS khusus tanpa iklan atau tautan keluar yang mendistraksi, dengan fitur resume otomatis & speed control.",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Kuis Interaktif & Tugas Portofolio",
+    desc: "Sistem penilaian terintegrasi dengan rubrik capaian pembelajaran dan pencatatan riwayat pengerjaan santri.",
+  },
+  {
+    icon: GraduationCap,
+    title: "E-Rapor Kurikulum Merdeka",
+    desc: "Rekap capaian akademik otomatis per elemen Informatika, format siap cetak PDF dengan predikat dan deskripsi kompetensi.",
+  },
+  {
+    icon: FileBadge,
+    title: "Sertifikat Digital Terverifikasi",
+    desc: "Penerbitan sertifikat kelulusan modul resmi dengan nomor seri unik dan QR-code verifikasi instan.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Portal Pengajar & Multi-Role",
+    desc: "Akses tersinkronisasi untuk Santri, Guru Pengampu, dan Admin Sekolah dengan kontrol presensi dan jurnal mengajar.",
+  },
 ];
 
 export function PlatformCapabilities() {
   return (
-    <section id="platform" className="border-y border-border/50 bg-card py-24">
+    <section id="platform" className="border-t border-border/60 bg-card py-20">
       <div className="mx-auto max-w-6xl px-5">
-        <div className="mb-12 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">Platform</p>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ lineHeight: "1.15" }}>
-            Satu sistem untuk mengajar, belajar, dan menilai
+        <div className="mb-12 max-w-2xl">
+          <p className="font-mono text-xs font-semibold uppercase tracking-widest text-primary mb-2">Kapabilitas Sistem</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-foreground leading-tight">
+            Arsitektur Belajar Berstandar Industri
           </h2>
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+            Dirancang secara khusus untuk santri pesantren digital dengan integrasi kurikulum terpadu dan laboratorium pemrograman langsung.
+          </p>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {capabilities.map((c) => (
             <div
               key={c.title}
-              className="rounded-2xl border border-border/60 bg-background p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              className="rounded-xl border border-border/80 bg-background p-6 transition-colors hover:border-primary/40"
             >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-                <c.icon className="h-5 w-5 text-primary" />
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <c.icon className="h-5 w-5" />
               </div>
-              <h3 className="font-semibold text-foreground">{c.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{c.desc}</p>
+              <h3 className="font-semibold text-foreground text-base mb-1.5">{c.title}</h3>
+              <p className="text-xs leading-relaxed text-muted-foreground">{c.desc}</p>
             </div>
           ))}
         </div>
@@ -181,121 +201,122 @@ export function PlatformCapabilities() {
   );
 }
 
-/* ─── Role split: siswa vs guru/admin ─── */
-const roleCards = [
-  {
-    icon: GraduationCap,
-    tag: "Untuk siswa",
-    title: "Dasbor belajar pribadi",
-    points: [
-      "Daftar kelas dan lanjutkan modul terakhir",
-      "Centang modul selesai, progres tersimpan otomatis",
-      "Rangkaian hari belajar dan level capaian",
-      "Pengumuman kelas dan pengingat harian",
-    ],
-    to: "/dashboard",
-    cta: "Buka dasbor siswa",
-  },
-  {
-    icon: ShieldCheck,
-    tag: "Untuk guru & admin",
-    title: "Panel pengelolaan kelas",
-    points: [
-      "CRUD data siswa lengkap dengan kredensial",
-      "Atur kelas yang diikuti tiap siswa",
-      "Visualisasi metrik dan distribusi kelas",
-      "Terbitkan dan ubah pengumuman",
-    ],
-    to: "/admin",
-    cta: "Buka panel admin",
-  },
-];
-
+/* ─── Role Split Showcase ─── */
 export function RoleShowcase() {
   return (
-    <section id="roles" className="py-24">
+    <section id="roles" className="py-20 bg-surface-alt border-t border-border/60">
       <div className="mx-auto max-w-6xl px-5">
-        <div className="grid gap-5 md:grid-cols-2">
-          {roleCards.map((r) => (
-            <div key={r.tag} className="flex flex-col rounded-2xl border border-border/60 bg-card p-8">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                <r.icon className="h-6 w-6 text-primary" />
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Santri Card */}
+          <div className="flex flex-col justify-between rounded-xl border border-border/80 bg-card p-8 shadow-xs">
+            <div>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-1 font-mono text-xs font-semibold text-foreground">
+                <GraduationCap className="h-4 w-4 text-primary" />
+                Portal Santri
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">{r.tag}</p>
-              <h3 className="mt-2 text-2xl font-bold tracking-tight text-foreground">{r.title}</h3>
-              <ul className="mt-5 flex-1 space-y-3">
-                {r.points.map((p) => (
-                  <li key={p} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                    <span>{p}</span>
-                  </li>
-                ))}
+              <h3 className="font-display text-2xl font-normal tracking-tight text-foreground mb-4">
+                Dasbor Belajar & Laboratorium Mandiri
+              </h3>
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Akses modul Informatika Kelas 7, 8, dan 9 secara berurutan.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Jalankan kode latihan langsung di browser tanpa instalasi software.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Kerjakan kuis dan unduh sertifikat kelulusan digital resmi.</span>
+                </li>
               </ul>
-              <Link
-                to={r.to}
-                className="mt-7 inline-flex items-center gap-1.5 self-start rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 active:scale-[0.97]"
-              >
-                {r.cta}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
             </div>
-          ))}
+            <Link
+              to="/dashboard"
+              className="mt-8 inline-flex items-center gap-2 font-semibold text-sm text-primary hover:underline"
+            >
+              Masuk Dasbor Santri <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {/* Guru Card */}
+          <div className="flex flex-col justify-between rounded-xl border border-border/80 bg-card p-8 shadow-xs">
+            <div>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-1 font-mono text-xs font-semibold text-foreground">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Portal Pengajar & Administrator
+              </div>
+              <h3 className="font-display text-2xl font-normal tracking-tight text-foreground mb-4">
+                Manajemen Kurikulum, Presensi & Rapor
+              </h3>
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Kelola jadwal tatap muka, input absensi, dan jurnal harian guru.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Pantau analitik ketuntasan santri per modul dan per kelas.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>Generate E-Rapor Kurikulum Merdeka otomatis siap cetak.</span>
+                </li>
+              </ul>
+            </div>
+            <Link
+              to="/admin"
+              className="mt-8 inline-flex items-center gap-2 font-semibold text-sm text-primary hover:underline"
+            >
+              Masuk Panel Pengajar <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/* ─── FAQ ─── */
+/* ─── FAQ Section ─── */
 const faqs = [
   {
-    q: "Apakah Digisschool LMS gratis untuk siswa?",
-    a: "Ya. Siswa dapat mendaftar, mengikuti kelas, dan memantau progres tanpa biaya. Sekolah dapat meminta fitur pengelolaan tambahan.",
+    q: "Apakah santri perlu menginstal editor kode seperti VS Code di komputer?",
+    a: "Tidak perlu. Digisschool LMS telah dilengkapi dengan Laboratorium Coding In-Browser yang mendukung Python 3 WASM, SQL SQLite, HTML/CSS/JS, dan Scratch secara langsung di peramban.",
   },
   {
-    q: "Bagaimana progres belajar dihitung?",
-    a: "Setiap modul yang ditandai selesai menambah persentase capaian materi. Persentase gabungan menentukan level Anda, mulai Pemula hingga Teladan.",
+    q: "Bagaimana cara mendapatkan sertifikat digital setelah menyelesaikan modul?",
+    a: "Sertifikat diterbitkan secara otomatis setelah santri menuntaskan seluruh video pembelajaran (>90%), membaca rangkuman, dan lulus kuis evaluasi dengan nilai di atas KKM.",
   },
   {
-    q: "Apakah guru bisa menambahkan siswa secara manual?",
-    a: "Bisa. Admin dapat membuat akun siswa lengkap dengan email, kata sandi, kelas, dan daftar materi yang diikuti dari panel admin.",
-  },
-  {
-    q: "Apakah bisa dipakai di ponsel?",
-    a: "Bisa. Tampilan menyesuaikan layar ponsel, tablet, dan desktop, serta progres tersinkron di semua perangkat setelah masuk.",
-  },
-  {
-    q: "Bagaimana dengan keamanan data siswa?",
-    a: "Data disimpan dengan aturan akses per peran, sehingga siswa hanya dapat melihat datanya sendiri dan admin memiliki akses pengelolaan.",
+    q: "Apakah data progres santri tersinkronisasi saat belajar di HP dan Laptop?",
+    a: "Ya. Seluruh progres materi, catatan refleksi, dan submission tugas tersimpan aman di cloud database Turso/LibSQL dan Supabase secara real-time.",
   },
 ];
 
 export function FaqSection() {
-  const { settings } = useSiteSettings();
-
   return (
-    <section id="faq" className="border-t border-border/50 py-24">
-      <div className="mx-auto max-w-3xl px-5">
+    <section id="faq" className="py-20 bg-background border-t border-border/60">
+      <div className="max-w-4xl mx-auto px-5">
         <div className="mb-10 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">Pertanyaan umum</p>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ lineHeight: "1.15" }}>
-            Hal yang sering ditanyakan
+          <p className="font-mono text-xs font-semibold uppercase tracking-widest text-primary mb-2">Tanya Jawab</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-foreground">
+            Pertanyaan yang Sering Diajukan
           </h2>
         </div>
 
-        <Accordion type="single" collapsible className="w-full">
-          {settings.faqs.map((f, i) => (
-            <AccordionItem key={f.q} value={`item-${i}`}>
-              <AccordionTrigger className="text-left text-base font-medium">{f.q}</AccordionTrigger>
-              <AccordionContent className="text-sm leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
+        <Accordion type="single" collapsible className="w-full space-y-3">
+          {faqs.map((f, i) => (
+            <AccordionItem key={i} value={`item-${i}`} className="rounded-xl border border-border/80 bg-card px-5">
+              <AccordionTrigger className="text-left font-semibold text-sm text-foreground hover:no-underline">
+                {f.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-xs text-muted-foreground leading-relaxed pt-1 pb-4">
+                {f.a}
+              </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
-
-        <div className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Clock className="h-3.5 w-3.5" />
-          Dukungan pengajar aktif setiap hari kerja, 08.00–17.00 WITA
-        </div>
       </div>
     </section>
   );

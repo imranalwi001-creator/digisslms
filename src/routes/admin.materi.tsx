@@ -412,13 +412,43 @@ function AdminMaterials() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">URL gambar sampul (opsional)</Label>
-              <Input
-                id="image"
-                value={form.imageUrl ?? ""}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                placeholder="https://..."
-              />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="image">Gambar Sampul Materi (opsional)</Label>
+                <label className="text-xs font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-1">
+                  <Upload className="w-3 h-3" />
+                  <span>Unggah dari perangkat</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          setForm({ ...form, imageUrl: ev.target?.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                        toast.success(`Gambar "${file.name}" dipilih dari perangkat`);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  id="image"
+                  value={form.imageUrl ?? ""}
+                  onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                  placeholder="https://... atau klik unggah dari perangkat"
+                  className="font-mono text-xs"
+                />
+                {form.imageUrl && (
+                  <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-border/80 shrink-0 bg-muted">
+                    <img src={form.imageUrl} alt="Sampul" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

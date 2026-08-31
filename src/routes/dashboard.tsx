@@ -377,19 +377,19 @@ function StudentDashboard({
       ) : (
         <div className="space-y-6">
           {/* Top Hero Student Greeting Card */}
-          <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/15 via-background to-secondary/30 p-6 shadow-sm">
+          <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card p-6 shadow-xs">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                  <span className="font-mono text-xs font-semibold px-2.5 py-0.5 rounded-md bg-secondary text-secondary-foreground border border-border/60">
                     Jenjang Kelas {grade || 7} SMP
                   </span>
-                  <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground font-semibold">
+                  <span className="font-mono text-xs px-2.5 py-0.5 rounded-md bg-surface-alt text-muted-foreground font-medium">
                     {termLabel(activeTerm)}
                   </span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-                  Ahlan wa Sahlan, Santri Digisschool! 🚀
+                <h2 className="font-display text-2xl sm:text-3xl font-normal text-foreground tracking-tight">
+                  Ahlan wa Sahlan, Santri Digisschool
                 </h2>
                 <p className="text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
                   Tingkatkan capaian kompetensi Kurikulum Merdeka Informatika dan raih peringkat terbaik di kelasmu.
@@ -398,27 +398,27 @@ function StudentDashboard({
 
               {/* Quick Highlight Badges */}
               <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-background/80 border border-border/70 shadow-xs">
-                  <Flame className="w-4 h-4 text-amber-500 animate-pulse" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-alt border border-border/70">
+                  <Flame className="w-4 h-4 text-primary" />
                   <div className="text-left">
                     <p className="text-[10px] font-mono text-muted-foreground uppercase">Streak</p>
-                    <p className="text-xs font-extrabold text-foreground">5 Hari</p>
+                    <p className="text-xs font-bold text-foreground tabular-nums">5 Hari</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-background/80 border border-border/70 shadow-xs">
-                  <Sparkles className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-alt border border-border/70">
+                  <Award className="w-4 h-4 text-primary" />
                   <div className="text-left">
                     <p className="text-[10px] font-mono text-muted-foreground uppercase">Total Skor</p>
-                    <p className="text-xs font-extrabold text-foreground">1.450 XP</p>
+                    <p className="text-xs font-bold text-foreground tabular-nums">1.450 XP</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-background/80 border border-border/70 shadow-xs">
-                  <Trophy className="w-4 h-4 text-amber-400" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-alt border border-border/70">
+                  <Trophy className="w-4 h-4 text-primary" />
                   <div className="text-left">
                     <p className="text-[10px] font-mono text-muted-foreground uppercase">Peringkat</p>
-                    <p className="text-xs font-extrabold text-foreground">#3 di Kelas</p>
+                    <p className="text-xs font-bold text-foreground">#3 di Kelas</p>
                   </div>
                 </div>
               </div>
@@ -427,7 +427,7 @@ function StudentDashboard({
 
           {/* Unified Navigation Tabs */}
           <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-            <TabsList className="w-full justify-start overflow-x-auto p-1.5 rounded-2xl bg-muted/50 border border-border/60 no-scrollbar">
+            <TabsList className="w-full justify-start overflow-x-auto p-1.5 rounded-xl bg-surface-alt border border-border/60 no-scrollbar">
               <TabsTrigger value="belajar" className="rounded-xl text-xs font-bold gap-1.5">
                 <BookOpen className="w-3.5 h-3.5" />
                 Ikhtisar
@@ -534,19 +534,19 @@ function StudentDashboard({
               <GamificationLeagueCard />
 
               {/* Quick E-Rapor Action Banner */}
-              <div className="p-6 rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 via-background to-secondary/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+              <div className="p-6 rounded-xl border border-border/80 bg-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center font-bold text-xl shrink-0">
-                    📋
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-semibold text-lg shrink-0">
+                    <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground text-sm sm:text-base">E-Rapor Capaian Pembelajaran Resmi</h3>
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">E-Rapor Capaian Pembelajaran Resmi</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Lihat rekapitulasi nilai formatif, sumatif, dan deskripsi capaian kompetensi Kurikulum Merdeka.
                     </p>
                   </div>
                 </div>
-                <Button onClick={() => setRaporOpen(true)} className="gap-2 text-xs font-bold shrink-0 shadow-sm rounded-xl">
+                <Button onClick={() => setRaporOpen(true)} className="gap-2 text-xs font-semibold shrink-0 rounded-lg">
                   <GraduationCap className="w-4 h-4" />
                   Buka E-Rapor Siswa
                 </Button>
@@ -1006,20 +1006,20 @@ function StudentDashboard({
 
             {/* TAB 8: E-RAPOR AKADEMIK */}
             <TabsContent value="rapor" className="space-y-6">
-              <div className="p-8 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-secondary/30 text-center max-w-2xl mx-auto shadow-md">
-                <div className="w-16 h-16 rounded-3xl bg-primary/15 text-primary flex items-center justify-center mx-auto mb-4">
-                  <GraduationCap className="w-8 h-8" />
+              <div className="p-8 rounded-xl border border-border/80 bg-card text-center max-w-2xl mx-auto shadow-xs">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                  <GraduationCap className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-extrabold text-foreground">E-Rapor Digital Kurikulum Merdeka</h3>
+                <h3 className="font-display text-2xl font-normal text-foreground">E-Rapor Digital Kurikulum Merdeka</h3>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-lg mx-auto leading-relaxed">
                   Laporan hasil belajar resmi jenjang SMP Fase D (Kelas 7, 8, 9) lengkap dengan deskripsi Capaian Pembelajaran (CP) dan catatan wali kelas.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                  <Button size="lg" onClick={() => setRaporOpen(true)} className="rounded-2xl font-bold gap-2 shadow-lg shadow-primary/20">
+                  <Button size="lg" onClick={() => setRaporOpen(true)} className="rounded-lg font-semibold gap-2">
                     <GraduationCap className="w-5 h-5" />
                     Buka E-Rapor Lengkap
                   </Button>
-                  <Button size="lg" variant="outline" asChild className="rounded-2xl font-semibold">
+                  <Button size="lg" variant="outline" asChild className="rounded-lg font-medium">
                     <Link to="/siswa/$id" params={{ id: userId }}>
                       Lihat Portofolio Prestasi
                     </Link>
