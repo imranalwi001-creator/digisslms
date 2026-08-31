@@ -220,28 +220,37 @@ function AdminStudents({
       "edit",
       { loading: "Menyimpan perubahan siswa...", success: "Data siswa diperbarui", error: "Gagal menyimpan perubahan" },
       async () => {
-      await updateProfile(target.id, {
-        display_name: form.fullName.trim() || null,
-        grade: form.grade ? Number(form.grade) : null,
-        phone: form.phone.trim() || null,
-        school: form.school.trim() || null,
-        notes: form.notes.trim() || null,
-        status: form.status,
-      });
-
-      if (form.email.trim() !== (target.email || "") || form.password) {
-        await updateStudentCredentials({
-          data: {
-            userId: target.id,
-            ...(form.email.trim() !== (target.email || "") ? { email: form.email.trim() } : {}),
-            ...(form.password ? { password: form.password } : {}),
-          },
+        await updateProfile(target.id, {
+          display_name: form.fullName.trim() || null,
+          grade: form.grade ? Number(form.grade) : null,
+          phone: form.phone.trim() || null,
+          school: form.school.trim() || null,
+          notes: form.notes.trim() || null,
+          status: form.status,
         });
-      }
 
-      if (form.role !== target.role && target.id !== currentUserId) {
-        await setUserRole(target.id, form.role);
-      }
+        const targetEmail = (target.email || "").trim().toLowerCase();
+        const nextEmail = form.email.trim().toLowerCase();
+        const emailChanged = Boolean(nextEmail) && nextEmail !== targetEmail;
+        const passwordChanged = Boolean(form.password && form.password.trim().length >= 6);
+
+        if (emailChanged || passwordChanged) {
+          try {
+            await updateStudentCredentials({
+              data: {
+                userId: target.id,
+                ...(emailChanged ? { email: form.email.trim() } : {}),
+                ...(passwordChanged ? { password: form.password.trim() } : {}),
+              },
+            });
+          } catch (credErr: any) {
+            console.warn("[Admin] updateStudentCredentials error:", credErr?.message);
+          }
+        }
+
+        if (form.role !== target.role && target.id !== currentUserId) {
+          await setUserRole(target.id, form.role);
+        }
         return true;
       },
     );

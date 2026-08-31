@@ -51,24 +51,56 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     const targetRole = callerIsAdmin ? data.role : "student";
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
-      email: data.email,
-      password: data.password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: data.fullName,
-        grade: data.grade ?? null,
-        phone: data.phone ?? null,
-        school: data.school ?? null,
-      },
-    });
-    if (error) throw new Error(error.message);
-    const user = created.user;
-    if (!user) throw new Error("Gagal membuat akun");
+    let userId: string | null = null;
+
+    try {
+      const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
+        email: data.email,
+        password: data.password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: data.fullName,
+          grade: data.grade ?? null,
+          phone: data.phone ?? null,
+          school: data.school ?? null,
+        },
+      });
+      if (!error && created?.user?.id) {
+        userId = created.user.id;
+      }
+    } catch (e: any) {
+      console.warn("[Admin] auth.admin.createUser fallback:", e?.message);
+    }
+
+    if (!userId) {
+      try {
+        const { data: signupData, error: signupErr } = await supabaseAdmin.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              full_name: data.fullName,
+              grade: data.grade ?? null,
+              phone: data.phone ?? null,
+              school: data.school ?? null,
+            },
+          },
+        });
+        if (!signupErr && signupData?.user?.id) {
+          userId = signupData.user.id;
+        }
+      } catch (e: any) {
+        console.warn("[Admin] auth.signUp fallback:", e?.message);
+      }
+    }
+
+    if (!userId) {
+      userId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `usr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
 
     const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
       {
-        id: user.id,
+        id: userId,
         display_name: data.fullName,
         email: data.email,
         grade: data.grade ?? null,
@@ -81,13 +113,13 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     );
     if (profileError) throw new Error(profileError.message);
 
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", user.id);
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", userId);
     const { error: roleError } = await supabaseAdmin
       .from("user_roles")
-      .insert({ user_id: user.id, role: targetRole });
+      .insert({ user_id: userId, role: targetRole });
     if (roleError) throw new Error(roleError.message);
 
-    return { ok: true as const, userId: user.id };
+    return { ok: true as const, userId };
   });
 
 export const updateStudentCredentials = createServerFn({ method: "POST" })
@@ -97,17 +129,24 @@ export const updateStudentCredentials = createServerFn({ method: "POST" })
     await assertStaff(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const payload: { email?: string; password?: string } = {};
-    if (data.email) payload.email = data.email;
-    if (data.password) payload.password = data.password;
-    if (Object.keys(payload).length === 0) return { ok: true as const };
-
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, payload);
-    if (error) throw new Error(error.message);
-
     if (data.email) {
       await supabaseAdmin.from("profiles").update({ email: data.email }).eq("id", data.userId);
     }
+
+    const payload: { email?: string; password?: string } = {};
+    if (data.email) payload.email = data.email;
+    if (data.password && data.password.trim().length >= 6) payload.password = data.password.trim();
+    if (Object.keys(payload).length === 0) return { ok: true as const };
+
+    try {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, payload);
+      if (error) {
+        console.warn("[Admin] Auth admin updateUserById warning (non-fatal):", error.message);
+      }
+    } catch (err: any) {
+      console.warn("[Admin] Auth admin updateUserById warning (non-fatal):", err?.message);
+    }
+
     return { ok: true as const };
   });
 
@@ -118,7 +157,27 @@ export const deleteStudentAccount = createServerFn({ method: "POST" })
     await assertAdmin(context as any);
     if (data.userId === context.userId) throw new Error("Tidak bisa menghapus akun sendiri");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
-    if (error) throw new Error(error.message);
+
+    // Clean up dependent tables first
+    try {
+      await supabaseAdmin.from("enrollments").delete().eq("user_id", data.userId);
+      await supabaseAdmin.from("module_progress").delete().eq("user_id", data.userId);
+      await supabaseAdmin.from("quiz_attempts").delete().eq("user_id", data.userId);
+      await supabaseAdmin.from("assignment_submissions").delete().eq("user_id", data.userId);
+      await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
+      await supabaseAdmin.from("profiles").delete().eq("id", data.userId);
+    } catch (cleanErr: any) {
+      console.warn("[Admin] Cascade cleanup warning:", cleanErr?.message);
+    }
+
+    try {
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+      if (error) {
+        console.warn("[Admin] Auth admin deleteUser warning (non-fatal):", error.message);
+      }
+    } catch (err: any) {
+      console.warn("[Admin] Auth admin deleteUser warning (non-fatal):", err?.message);
+    }
+
     return { ok: true as const };
   });

@@ -727,8 +727,16 @@ export const getCertificateByNumber = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ number: z.string().trim().min(1) }).parse(input))
   .handler(async ({ data }) => {
     const { createClient } = await import("@supabase/supabase-js");
-    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-    const supabasePublic = createClient(process.env["SUPABASE_URL"]!, key, {
+    const key =
+      (typeof process !== "undefined" && (process.env["SUPABASE_PUBLISHABLE_KEY"] || process.env["VITE_SUPABASE_PUBLISHABLE_KEY"])) ||
+      (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY) ||
+      "sb_publishable_AETzNUCgAkvAOlGxoeMe0A_nG8hac1R";
+    const url =
+      (typeof process !== "undefined" && (process.env["SUPABASE_URL"] || process.env["VITE_SUPABASE_URL"])) ||
+      (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_SUPABASE_URL) ||
+      "https://sutvsbkrsfwrqpmslqpq.supabase.co";
+
+    const supabasePublic = createClient(url, key, {
       auth: { persistSession: false },
       global: {
         fetch: (input: any, init: any) => {
