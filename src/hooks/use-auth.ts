@@ -1,40 +1,98 @@
 import { useState, useEffect, useCallback } from "react";
-import type { User, Session } from "@supabase/supabase-js";
+import { getTursoCurrentSession, tursoLogout, type TursoUser } from "@/lib/turso-auth";
 
 export interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: any | null;
+  session: any | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
 }
 
 export function useAuth(): AuthState {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<any | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Dynamic import to avoid SSR issues with supabase client
-    import("@/integrations/supabase/client").then(({ supabase }) => {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
+  const checkAuth = useCallback(() => {
+    const tursoUser = getTursoCurrentSession();
+    if (tursoUser) {
+      const authUser = {
+        id: tursoUser.id,
+        email: tursoUser.email,
+        user_metadata: {
+          full_name: tursoUser.full_name,
+          grade: tursoUser.grade ?? null,
+          phone: tursoUser.phone_number ?? null,
+          school: tursoUser.school_name ?? null,
+        },
+      };
+      setUser(authUser);
+      setSession({
+        user: authUser,
+        access_token: `turso_${tursoUser.id}`,
       });
-
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
-      });
-
-      return () => subscription.unsubscribe();
-    });
+      setIsLoading(false);
+      return true;
+    }
+    return false;
   }, []);
 
+  useEffect(() => {
+    // 1. First check Turso native session
+    const hasTurso = checkAuth();
+
+    // 2. Listen to custom auth events
+    const handleAuthChange = () => {
+      const found = checkAuth();
+      if (!found) {
+        setUser(null);
+        setSession(null);
+        setIsLoading(false);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("turso-auth-change", handleAuthChange);
+      window.addEventListener("storage", handleAuthChange);
+    }
+
+    // 3. Fallback: Supabase check if Turso session wasn't found
+    if (!hasTurso) {
+      import("@/integrations/supabase/client")
+        .then(({ supabase }) => {
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user && !getTursoCurrentSession()) {
+              setSession(session);
+              setUser(session.user);
+            }
+            setIsLoading(false);
+          }).catch(() => {
+            setIsLoading(false);
+          });
+        })
+        .catch(() => {
+          setIsLoading(false);
+        });
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("turso-auth-change", handleAuthChange);
+        window.removeEventListener("storage", handleAuthChange);
+      }
+    };
+  }, [checkAuth]);
+
   const signOut = useCallback(async () => {
-    const { supabase } = await import("@/integrations/supabase/client");
-    await supabase.auth.signOut();
+    tursoLogout();
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+    setUser(null);
+    setSession(null);
   }, []);
 
   return { user, session, isLoading, signOut };

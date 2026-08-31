@@ -167,22 +167,106 @@ export async function deleteAnnouncement(id: string) {
 /* ---------- admin ---------- */
 
 export async function fetchAdminData() {
-  const supabase = await db();
-  const [profiles, roles, enrollments, progress] = await Promise.all([
-    supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-    supabase.from("user_roles").select("*"),
-    supabase.from("enrollments").select("*"),
-    supabase.from("module_progress").select("*"),
-  ]);
-  for (const r of [profiles, roles, enrollments, progress]) {
-    if (r.error) throw r.error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+
+    const [profilesRes, rolesRes, enrollmentsRes, progressRes, usersRes] = await Promise.all([
+      db.execute("SELECT * FROM profiles ORDER BY created_at DESC;").catch(() => ({ rows: [] })),
+      db.execute("SELECT * FROM user_roles;").catch(() => ({ rows: [] })),
+      db.execute("SELECT * FROM enrollments;").catch(() => ({ rows: [] })),
+      db.execute("SELECT * FROM module_progress;").catch(() => ({ rows: [] })),
+      db.execute("SELECT * FROM users ORDER BY created_at DESC;").catch(() => ({ rows: [] })),
+    ]);
+
+    const profileMap = new Map<string, ProfileRow>();
+
+    // 1. Add from profiles table
+    for (const r of profilesRes.rows || []) {
+      profileMap.set(String(r.id), {
+        id: String(r.id),
+        display_name: r.display_name ? String(r.display_name) : null,
+        email: r.email ? String(r.email) : null,
+        grade: r.grade ? Number(r.grade) : null,
+        phone: r.phone ? String(r.phone) : null,
+        school: r.school ? String(r.school) : null,
+        notes: r.notes ? String(r.notes) : null,
+        status: r.status ? String(r.status) : "active",
+        created_at: String(r.created_at || new Date().toISOString()),
+      });
+    }
+
+    // 2. Supplement/Merge from users table
+    for (const u of usersRes.rows || []) {
+      const existing = profileMap.get(String(u.id));
+      if (existing) {
+        if (!existing.email && u.email) existing.email = String(u.email);
+        if (!existing.display_name && u.full_name) existing.display_name = String(u.full_name);
+      } else {
+        profileMap.set(String(u.id), {
+          id: String(u.id),
+          display_name: u.full_name ? String(u.full_name) : null,
+          email: u.email ? String(u.email) : null,
+          grade: null,
+          phone: u.phone_number ? String(u.phone_number) : null,
+          school: null,
+          notes: null,
+          status: u.status ? String(u.status) : "active",
+          created_at: String(u.created_at || new Date().toISOString()),
+        });
+      }
+    }
+
+    const rolesList: Array<{ user_id: string; role: string }> = (rolesRes.rows || []).map((r) => ({
+      user_id: String(r.user_id),
+      role: String(r.role),
+    }));
+
+    // Supplement roles from users table if not in user_roles
+    for (const u of usersRes.rows || []) {
+      if (u.role && !rolesList.some((r) => r.user_id === String(u.id))) {
+        rolesList.push({ user_id: String(u.id), role: String(u.role) });
+      }
+    }
+
+    const enrollmentsList = (enrollmentsRes.rows || []).map((e) => ({
+      id: String(e.id || `${e.user_id}-${e.material_slug}`),
+      userId: String(e.user_id),
+      materialSlug: String(e.material_slug),
+      status: "active",
+      createdAt: String(e.created_at || ""),
+    }));
+
+    const progressList = (progressRes.rows || []).map((p) => ({
+      id: String(p.id || `${p.user_id}-${p.material_slug}-${p.module_index}`),
+      userId: String(p.user_id),
+      materialSlug: String(p.material_slug),
+      moduleIndex: Number(p.module_index),
+      completedAt: String(p.completed_at || ""),
+    }));
+
+    return {
+      profiles: Array.from(profileMap.values()),
+      roles: rolesList,
+      enrollments: enrollmentsList,
+      progress: progressList,
+    };
+  } catch (tursoErr) {
+    console.warn("[LMS] Fallback to client db:", tursoErr);
+    const supabase = await db();
+    const [profiles, roles, enrollments, progress] = await Promise.all([
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+      supabase.from("user_roles").select("*"),
+      supabase.from("enrollments").select("*"),
+      supabase.from("module_progress").select("*"),
+    ]);
+    return {
+      profiles: (profiles.data || []) as ProfileRow[],
+      roles: (roles.data || []) as Array<{ user_id: string; role: string }>,
+      enrollments: ((enrollments.data || []) as any[]).map(mapEnrollment),
+      progress: ((progress.data || []) as any[]).map(mapProgress),
+    };
   }
-  return {
-    profiles: (profiles.data || []) as ProfileRow[],
-    roles: (roles.data || []) as Array<{ user_id: string; role: string }>,
-    enrollments: ((enrollments.data || []) as any[]).map(mapEnrollment),
-    progress: ((progress.data || []) as any[]).map(mapProgress),
-  };
 }
 
 export type ProfileRow = {

@@ -123,41 +123,23 @@ function LoginPage() {
 
     setLoading(true);
     try {
-      const supabase = await getSupabase();
+      const { tursoLogin, tursoRegister } = await import("@/lib/turso-auth");
+
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email: identifier,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-              full_name: fullName.trim(),
-              grade: Number(grade),
-            },
-          },
-        });
-        if (error) throw error;
-        toast.success("Akun dibuat. Cek email Anda untuk konfirmasi.");
-        setIsSignUp(false);
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: identifier,
-          password,
-        });
-        if (error) throw error;
-        const { data: session } = await supabase.auth.getUser();
-        const uid = session.user?.id;
-        let staff = isAdminLogin;
-        if (uid) {
-          const { data: roles } = await (supabase as any)
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", uid);
-          staff =
-            staff ||
-            (roles || []).some((r: any) => r.role === "admin" || r.role === "guru");
+        const res = await tursoRegister(fullName.trim(), identifier, password, Number(grade));
+        if (!res.success || !res.user) {
+          throw new Error(res.error || "Gagal membuat akun");
         }
-        navigate({ to: staff ? "/admin" : "/dashboard" });
+        toast.success("Akun berhasil dibuat. Selamat datang di Digisschool LMS!");
+        navigate({ to: "/dashboard" });
+      } else {
+        const res = await tursoLogin(identifier, password);
+        if (!res.success || !res.user) {
+          throw new Error(res.error || "Email atau kata sandi salah");
+        }
+        toast.success(`Selamat datang kembali, ${res.user.full_name}!`);
+        const isStaff = res.user.role === "admin" || res.user.role === "guru" || isAdminLogin;
+        navigate({ to: isStaff ? "/admin" : "/dashboard" });
       }
     } catch (err: any) {
       toast.error(err.message || "Gagal masuk");

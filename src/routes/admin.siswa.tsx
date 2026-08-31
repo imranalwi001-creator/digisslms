@@ -190,20 +190,22 @@ function AdminStudents({
     }
     const ok = await run(
       "create",
-      { loading: "Membuat akun siswa...", success: "Akun siswa berhasil dibuat", error: "Gagal membuat akun" },
+      { loading: "Membuat akun siswa...", success: "Akun siswa berhasil dibuat di Turso", error: "Gagal membuat akun" },
       async () => {
-        await createStudentAccount({
-          data: {
-            fullName: form.fullName.trim(),
-            email: form.email.trim(),
-            password: form.password,
-            grade: Number(form.grade),
-            phone: form.phone.trim(),
-            school: form.school.trim(),
-            notes: form.notes.trim(),
-            role: form.role,
-          },
+        const { tursoAdminCreateUser } = await import("@/lib/turso-auth");
+        const res = await tursoAdminCreateUser({
+          fullName: form.fullName.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          grade: Number(form.grade),
+          phone: form.phone.trim() || null,
+          school: form.school.trim() || null,
+          notes: form.notes.trim() || null,
+          role: form.role,
         });
+        if (!res.success) {
+          throw new Error(res.error || "Gagal membuat akun");
+        }
         return true;
       },
     );
@@ -218,38 +220,23 @@ function AdminStudents({
     const target = editing;
     const ok = await run(
       "edit",
-      { loading: "Menyimpan perubahan siswa...", success: "Data siswa diperbarui", error: "Gagal menyimpan perubahan" },
+      { loading: "Menyimpan perubahan siswa...", success: "Data siswa diperbarui di Turso", error: "Gagal menyimpan perubahan" },
       async () => {
-        await updateProfile(target.id, {
-          display_name: form.fullName.trim() || null,
+        const { tursoAdminUpdateUser } = await import("@/lib/turso-auth");
+        const res = await tursoAdminUpdateUser(target.id, {
+          fullName: form.fullName.trim() || undefined,
+          email: form.email.trim() || undefined,
+          password: form.password && form.password.trim().length >= 6 ? form.password.trim() : undefined,
           grade: form.grade ? Number(form.grade) : null,
           phone: form.phone.trim() || null,
           school: form.school.trim() || null,
           notes: form.notes.trim() || null,
           status: form.status,
+          role: form.role,
         });
 
-        const targetEmail = (target.email || "").trim().toLowerCase();
-        const nextEmail = form.email.trim().toLowerCase();
-        const emailChanged = Boolean(nextEmail) && nextEmail !== targetEmail;
-        const passwordChanged = Boolean(form.password && form.password.trim().length >= 6);
-
-        if (emailChanged || passwordChanged) {
-          try {
-            await updateStudentCredentials({
-              data: {
-                userId: target.id,
-                ...(emailChanged ? { email: form.email.trim() } : {}),
-                ...(passwordChanged ? { password: form.password.trim() } : {}),
-              },
-            });
-          } catch (credErr: any) {
-            console.warn("[Admin] updateStudentCredentials error:", credErr?.message);
-          }
-        }
-
-        if (form.role !== target.role && target.id !== currentUserId) {
-          await setUserRole(target.id, form.role);
+        if (!res.success) {
+          throw new Error(res.error || "Gagal menyimpan perubahan siswa");
         }
         return true;
       },
@@ -264,9 +251,13 @@ function AdminStudents({
     const target = deleting;
     const ok = await run(
       target.id,
-      { loading: "Menghapus akun siswa...", success: "Akun siswa dihapus", error: "Gagal menghapus akun" },
+      { loading: "Menghapus akun siswa...", success: "Akun siswa dihapus dari Turso", error: "Gagal menghapus akun" },
       async () => {
-        await deleteStudentAccount({ data: { userId: target.id } });
+        const { tursoAdminDeleteUser } = await import("@/lib/turso-auth");
+        const res = await tursoAdminDeleteUser(target.id);
+        if (!res.success) {
+          throw new Error(res.error || "Gagal menghapus akun");
+        }
         return true;
       },
     );
