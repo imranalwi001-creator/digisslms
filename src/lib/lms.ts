@@ -49,60 +49,106 @@ async function db() {
 
 /* ---------- student ---------- */
 
-/** Ensures a profile row exists for the signed-in user (no auth trigger available). */
+/** Ensures a profile row exists for the signed-in user. */
 export async function ensureProfile() {
-  const supabase = await db();
-  const { data } = await supabase.auth.getUser();
-  const user = data?.user;
-  if (!user) return;
-  const meta = user.user_metadata || {};
-  const { data: existing } = await supabase.from("profiles").select("id").eq("id", user.id).maybeSingle();
-  if (existing) return;
-  await supabase.from("profiles").insert({
-    id: user.id,
-    display_name: meta.full_name || meta.name || (user.email || "").split("@")[0],
-    avatar_url: meta.avatar_url || meta.picture || null,
-    email: user.email,
-    grade: meta.grade ? Number(meta.grade) : null,
-    phone: meta.phone || null,
-    school: meta.school || null,
-  });
+  try {
+    const { getTursoCurrentSession } = await import("@/lib/turso-auth");
+    const user = getTursoCurrentSession();
+    if (!user) return;
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.execute({
+      sql: `INSERT OR IGNORE INTO profiles (id, display_name, full_name, email, role, status)
+            VALUES (?, ?, ?, ?, ?, 'active');`,
+      args: [user.id, user.full_name, user.full_name, user.email, user.role],
+    });
+  } catch {
+    // Non-fatal
+  }
 }
 
 export async function fetchEnrollments(userId: string): Promise<Enrollment[]> {
-  const supabase = await db();
-  const { data, error } = await supabase
-    .from("enrollments")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data || []).map(mapEnrollment);
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    const res = await db.execute({
+      sql: "SELECT * FROM enrollments WHERE user_id = ? ORDER BY created_at DESC;",
+      args: [userId],
+    });
+    return (res.rows || []).map((e) => ({
+      id: String(e.id || `${e.user_id}-${e.material_slug}`),
+      userId: String(e.user_id),
+      materialSlug: String(e.material_slug),
+      status: "active",
+      createdAt: String(e.created_at || ""),
+    }));
+  } catch (err) {
+    const supabase = await db();
+    const { data } = await supabase
+      .from("enrollments")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    return (data || []).map(mapEnrollment);
+  }
 }
 
 export async function fetchModuleProgress(userId: string): Promise<ModuleProgress[]> {
-  const supabase = await db();
-  const { data, error } = await supabase.from("module_progress").select("*").eq("user_id", userId);
-  if (error) throw error;
-  return (data || []).map(mapProgress);
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    const res = await db.execute({
+      sql: "SELECT * FROM module_progress WHERE user_id = ?;",
+      args: [userId],
+    });
+    return (res.rows || []).map((p) => ({
+      id: String(p.id || `${p.user_id}-${p.material_slug}-${p.module_index}`),
+      userId: String(p.user_id),
+      materialSlug: String(p.material_slug),
+      moduleIndex: Number(p.module_index),
+      completedAt: String(p.completed_at || ""),
+    }));
+  } catch (err) {
+    const supabase = await db();
+    const { data } = await supabase.from("module_progress").select("*").eq("user_id", userId);
+    return (data || []).map(mapProgress);
+  }
 }
 
 export async function enroll(userId: string, materialSlug: string) {
-  const supabase = await db();
-  const { error } = await supabase
-    .from("enrollments")
-    .upsert({ user_id: userId, material_slug: materialSlug }, { onConflict: "user_id,material_slug" });
-  if (error) throw error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    const id = `${userId}-${materialSlug}`;
+    await db.execute({
+      sql: `INSERT OR REPLACE INTO enrollments (id, user_id, material_slug, created_at)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP);`,
+      args: [id, userId, materialSlug],
+    });
+  } catch (err) {
+    const supabase = await db();
+    await supabase
+      .from("enrollments")
+      .upsert({ user_id: userId, material_slug: materialSlug }, { onConflict: "user_id,material_slug" });
+  }
 }
 
 export async function unenroll(userId: string, materialSlug: string) {
-  const supabase = await db();
-  const { error } = await supabase
-    .from("enrollments")
-    .delete()
-    .eq("user_id", userId)
-    .eq("material_slug", materialSlug);
-  if (error) throw error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.execute({
+      sql: "DELETE FROM enrollments WHERE user_id = ? AND material_slug = ?;",
+      args: [userId, materialSlug],
+    });
+  } catch (err) {
+    const supabase = await db();
+    await supabase
+      .from("enrollments")
+      .delete()
+      .eq("user_id", userId)
+      .eq("material_slug", materialSlug);
+  }
 }
 
 export async function toggleModule(
@@ -111,35 +157,66 @@ export async function toggleModule(
   moduleIndex: number,
   done: boolean,
 ) {
-  const supabase = await db();
-  if (done) {
-    const { error } = await supabase
-      .from("module_progress")
-      .upsert(
-        { user_id: userId, material_slug: materialSlug, module_index: moduleIndex },
-        { onConflict: "user_id,material_slug,module_index" },
-      );
-    if (error) throw error;
-  } else {
-    const { error } = await supabase
-      .from("module_progress")
-      .delete()
-      .eq("user_id", userId)
-      .eq("material_slug", materialSlug)
-      .eq("module_index", moduleIndex);
-    if (error) throw error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    const id = `${userId}-${materialSlug}-${moduleIndex}`;
+    if (done) {
+      await db.execute({
+        sql: `INSERT OR REPLACE INTO module_progress (id, user_id, material_slug, module_index, completed_at)
+              VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);`,
+        args: [id, userId, materialSlug, moduleIndex],
+      });
+    } else {
+      await db.execute({
+        sql: "DELETE FROM module_progress WHERE user_id = ? AND material_slug = ? AND module_index = ?;",
+        args: [userId, materialSlug, moduleIndex],
+      });
+    }
+  } catch (err) {
+    const supabase = await db();
+    if (done) {
+      await supabase
+        .from("module_progress")
+        .upsert(
+          { user_id: userId, material_slug: materialSlug, module_index: moduleIndex },
+          { onConflict: "user_id,material_slug,module_index" },
+        );
+    } else {
+      await supabase
+        .from("module_progress")
+        .delete()
+        .eq("user_id", userId)
+        .eq("material_slug", materialSlug)
+        .eq("module_index", moduleIndex);
+    }
   }
 }
 
 export async function fetchAnnouncements(limit = 20): Promise<Announcement[]> {
-  const supabase = await db();
-  const { data, error } = await supabase
-    .from("announcements")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return (data || []).map(mapAnnouncement);
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    const res = await db.execute({
+      sql: "SELECT * FROM announcements ORDER BY created_at DESC LIMIT ?;",
+      args: [limit],
+    });
+    return (res.rows || []).map((a) => ({
+      id: String(a.id),
+      title: String(a.title),
+      body: String(a.body),
+      level: String(a.level || "info"),
+      createdAt: String(a.created_at || ""),
+    }));
+  } catch {
+    const supabase = await db();
+    const { data } = await supabase
+      .from("announcements")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return (data || []).map(mapAnnouncement);
+  }
 }
 
 export async function createAnnouncement(input: {
@@ -148,20 +225,102 @@ export async function createAnnouncement(input: {
   level: string;
   userId: string;
 }) {
-  const supabase = await db();
-  const { error } = await supabase.from("announcements").insert({
-    title: input.title,
-    body: input.body,
-    level: input.level,
-    created_by: input.userId,
-  });
-  if (error) throw error;
+  const id = `ann_${Date.now()}`;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.execute({
+      sql: "INSERT INTO announcements (id, title, body, level, created_by, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);",
+      args: [id, input.title, input.body, input.level, input.userId],
+    });
+  } catch {
+    const supabase = await db();
+    await supabase.from("announcements").insert({
+      title: input.title,
+      body: input.body,
+      level: input.level,
+      created_by: input.userId,
+    });
+  }
 }
 
 export async function deleteAnnouncement(id: string) {
-  const supabase = await db();
-  const { error } = await supabase.from("announcements").delete().eq("id", id);
-  if (error) throw error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.execute({
+      sql: "DELETE FROM announcements WHERE id = ?;",
+      args: [id],
+    });
+  } catch {
+    const supabase = await db();
+    await supabase.from("announcements").delete().eq("id", id);
+  }
+}
+
+export async function updateAnnouncement(
+  id: string,
+  patch: { title: string; body: string; level: string },
+) {
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.execute({
+      sql: "UPDATE announcements SET title = ?, body = ?, level = ? WHERE id = ?;",
+      args: [patch.title, patch.body, patch.level, id],
+    });
+  } catch {
+    const supabase = await db();
+    await supabase.from("announcements").update(patch).eq("id", id);
+  }
+}
+
+export async function fetchEnrollmentsFor(userId: string) {
+  return fetchEnrollments(userId);
+}
+
+export async function updateProfile(
+  userId: string,
+  patch: {
+    display_name?: string | null;
+    grade?: number | null;
+    phone?: string | null;
+    school?: string | null;
+    notes?: string | null;
+    status?: string;
+  },
+) {
+  try {
+    const { tursoAdminUpdateUser } = await import("@/lib/turso-auth");
+    await tursoAdminUpdateUser(userId, {
+      fullName: patch.display_name ?? undefined,
+      grade: patch.grade,
+      phone: patch.phone,
+      school: patch.school,
+      notes: patch.notes,
+      status: patch.status,
+    });
+  } catch (err) {
+    const supabase = await db();
+    await supabase.from("profiles").update(patch).eq("id", userId);
+  }
+}
+
+export async function setUserRole(userId: string, role: "admin" | "guru" | "student") {
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.batch([
+      { sql: "DELETE FROM user_roles WHERE user_id = ?;", args: [userId] },
+      { sql: "INSERT INTO user_roles (user_id, role) VALUES (?, ?);", args: [userId, role] },
+      { sql: "UPDATE users SET role = ? WHERE id = ?;", args: [role, userId] },
+      { sql: "UPDATE profiles SET role = ? WHERE id = ?;", args: [role, userId] },
+    ], "write");
+  } catch (err) {
+    const supabase = await db();
+    await supabase.from("user_roles").delete().eq("user_id", userId);
+    await supabase.from("user_roles").insert({ user_id: userId, role });
+  }
 }
 
 /* ---------- admin ---------- */
@@ -281,42 +440,6 @@ export type ProfileRow = {
   created_at: string;
 };
 
-export async function updateProfile(
-  userId: string,
-  patch: {
-    display_name?: string | null;
-    grade?: number | null;
-    phone?: string | null;
-    school?: string | null;
-    notes?: string | null;
-    status?: string;
-  },
-) {
-  const supabase = await db();
-  const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
-  if (error) throw error;
-}
-
-export async function updateAnnouncement(
-  id: string,
-  patch: { title: string; body: string; level: string },
-) {
-  const supabase = await db();
-  const { error } = await supabase.from("announcements").update(patch).eq("id", id);
-  if (error) throw error;
-}
-
-export async function fetchEnrollmentsFor(userId: string) {
-  return fetchEnrollments(userId);
-}
-
-export async function setUserRole(userId: string, role: "admin" | "guru" | "student") {
-  const supabase = await db();
-  const { error: delErr } = await supabase.from("user_roles").delete().eq("user_id", userId);
-  if (delErr) throw delErr;
-  const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-  if (error) throw error;
-}
 
 export function buildStudentRows(data: Awaited<ReturnType<typeof fetchAdminData>>): StudentRow[] {
   return data.profiles.map((p) => {

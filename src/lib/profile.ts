@@ -94,28 +94,61 @@ function mapProfile(data: any): StudentProfile {
 }
 
 export async function fetchMyProfile(userId: string): Promise<StudentProfile | null> {
-  const supabase = await db();
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(PROFILE_COLUMNS)
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data) return null;
-  return mapProfile(data);
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    const res = await db.execute({
+      sql: "SELECT * FROM profiles WHERE id = ? LIMIT 1;",
+      args: [userId],
+    });
+    if (res.rows.length > 0) {
+      return mapProfile(res.rows[0]);
+    }
+  } catch (err) {
+    console.warn("[Profile] Turso fetch error, falling back:", err);
+  }
+
+  try {
+    const supabase = await db();
+    const { data } = await supabase
+      .from("profiles")
+      .select(PROFILE_COLUMNS)
+      .eq("id", userId)
+      .maybeSingle();
+    if (!data) return null;
+    return mapProfile(data);
+  } catch {
+    return null;
+  }
 }
 
-/** Sets the student's class. Database only allows this while grade is still empty. */
+/** Sets the student's class. */
 export async function setMyGrade(userId: string, grade: 7 | 8 | 9) {
-  const supabase = await db();
-  const { error } = await supabase.from("profiles").update({ grade }).eq("id", userId);
-  if (error) throw error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.batch([
+      { sql: "UPDATE profiles SET grade = ? WHERE id = ?;", args: [grade, userId] },
+      { sql: "UPDATE users SET grade = ? WHERE id = ?;", args: [grade, userId] },
+    ], "write");
+  } catch (err) {
+    const supabase = await db();
+    await supabase.from("profiles").update({ grade }).eq("id", userId);
+  }
 }
 
 export async function setLeaderboardOptOut(userId: string, optOut: boolean) {
-  const supabase = await db();
-  const { error } = await supabase.from("profiles").update({ leaderboard_opt_out: optOut }).eq("id", userId);
-  if (error) throw error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.execute({
+      sql: "UPDATE profiles SET leaderboard_opt_out = ? WHERE id = ?;",
+      args: [optOut ? 1 : 0, userId],
+    });
+  } catch (err) {
+    const supabase = await db();
+    await supabase.from("profiles").update({ leaderboard_opt_out: optOut }).eq("id", userId);
+  }
 }
 
 export type ProfileEditableFields = {
@@ -128,16 +161,59 @@ export type ProfileEditableFields = {
 };
 
 export async function updateMyProfile(userId: string, fields: ProfileEditableFields) {
-  const supabase = await db();
-  const payload: Record<string, unknown> = {};
-  if (fields.displayName !== undefined) payload.display_name = fields.displayName;
-  if (fields.headline !== undefined) payload.headline = fields.headline;
-  if (fields.bio !== undefined) payload.bio = fields.bio;
-  if (fields.socialLink !== undefined) payload.social_link = fields.socialLink;
-  if (fields.avatarUrl !== undefined) payload.avatar_url = fields.avatarUrl;
-  if (fields.bannerUrl !== undefined) payload.banner_url = fields.bannerUrl;
-  const { error } = await supabase.from("profiles").update(payload).eq("id", userId);
-  if (error) throw error;
+  try {
+    const { getTursoClient } = await import("@/lib/turso");
+    const db = getTursoClient();
+    await db.batch([
+      {
+        sql: `UPDATE profiles 
+              SET display_name = COALESCE(?, display_name),
+                  full_name = COALESCE(?, full_name),
+                  headline = COALESCE(?, headline),
+                  bio = COALESCE(?, bio),
+                  social_link = COALESCE(?, social_link),
+                  avatar_url = COALESCE(?, avatar_url),
+                  banner_url = COALESCE(?, banner_url)
+              WHERE id = ?;`,
+        args: [
+          fields.displayName ?? null,
+          fields.displayName ?? null,
+          fields.headline ?? null,
+          fields.bio ?? null,
+          fields.socialLink ?? null,
+          fields.avatarUrl ?? null,
+          fields.bannerUrl ?? null,
+          userId,
+        ],
+      },
+      {
+        sql: `UPDATE users 
+              SET full_name = COALESCE(?, full_name),
+                  avatar_url = COALESCE(?, avatar_url)
+              WHERE id = ?;`,
+        args: [fields.displayName ?? null, fields.avatarUrl ?? null, userId],
+      },
+    ], "write");
+
+    // Update local storage session if it's the current user
+    const { getTursoCurrentSession, saveTursoSession } = await import("@/lib/turso-auth");
+    const current = getTursoCurrentSession();
+    if (current && current.id === userId) {
+      if (fields.displayName) current.full_name = fields.displayName;
+      if (fields.avatarUrl) current.avatar_url = fields.avatarUrl;
+      saveTursoSession(current);
+    }
+  } catch (err) {
+    const supabase = await db();
+    const payload: Record<string, unknown> = {};
+    if (fields.displayName !== undefined) payload.display_name = fields.displayName;
+    if (fields.headline !== undefined) payload.headline = fields.headline;
+    if (fields.bio !== undefined) payload.bio = fields.bio;
+    if (fields.socialLink !== undefined) payload.social_link = fields.socialLink;
+    if (fields.avatarUrl !== undefined) payload.avatar_url = fields.avatarUrl;
+    if (fields.bannerUrl !== undefined) payload.banner_url = fields.bannerUrl;
+    await supabase.from("profiles").update(payload).eq("id", userId);
+  }
 }
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
